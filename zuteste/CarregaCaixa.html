@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando Caixa de texto para dialagos</title>
+    <style>
+#game-container {
+    max-width: 600px;
+    width: 90%;
+    padding: 20px;
+    border: 2px solid #333;
+    background-color: #1e1e1e;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
+}
+
+#text-container {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    min-height: 100px;
+    color: aliceblue;
+}
+
+#choices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button {
+    background-color: #2a2a2a;
+    color: #00ff66;
+    border: 1px solid #00ff66;
+    padding: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #00ff66;
+    color: #121212;
+}
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="text-container">Carregando história...</div>
+        <div id="choices-container">
+            <!-- Os botões de escolha vão aparecer aqui via JavaScript -->
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
