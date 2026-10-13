@@ -3,8 +3,9 @@
     $idsu;
     $mail;
     $senha;
-    $nível;
     $apelido;
+    $nível;
+    
 
  function __construct($mail, $senha, $nivel){
     $this->mail = $mail;
@@ -14,30 +15,26 @@
  //ids são auto_incremente ou fazemos uma distribuição de numeros 
  
  function cadasSu(){
-
-   
-   
-   
    try {
-     $sql = "INSERT INTO clientes(apelido, email, nivel) VALUES (:apelido, :mail, :nivel)"
+     $sql = "INSERT INTO clientes(mail, apelido, nivel) VALUES (' :mail, :apelido, :nivel')";
    $con = new conexao();
    $pdo = $con->pdo;
      
     $stmt = $pdo->prepare($sql);
 
-    $dados = [];
-    $dados[':apelido'] = $this->apelido;
+    $dados = []; 
+    $dados = [':mail'] = $this->mail;
+    $dados = [':apelido'] = $this->apelido;
+    $dados = [':nivel'] = $this->nivel;
     // 5. Executar passando os dados reais
     $stmt->execute($dados);
 
-    $this->id = $pdo->lastInsertID();
+    $this->id = $pdo->lastInsertID(); //insere id
 
 } catch (PDOException $e) {
     // Caso dê algum erro na conexão ou na query
     echo "Erro: " . $e->getMessage();
 }
-
-
    } //fim do cadasu
 
   function Login(){

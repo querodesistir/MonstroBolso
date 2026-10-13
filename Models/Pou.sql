@@ -15,7 +15,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE usuario (
 	idsu int PRIMARY KEY not null,
-    mail VARCHAR(100) NOT NULL,
+    mail VARCHAR(100) UNIQUE NOT NULL,
     senha VARCHAR(12) NOT NULL,
     apelido varchar(30) not null,
     nivel INT DEFAUlt 0
@@ -33,7 +33,7 @@ create table especie(
 
 create table monstro (
 	id int not null primary key,
-	nome varchar(30) not null,
+	nome varchar(30) not null UNIQUE,
 	dano int not null,
 	hp int not null,
 	def int,
@@ -61,7 +61,8 @@ descri varchar(200)
 );
 
 create table loja(
-itid int not null,
+itid int NOT NULL,
+itnome varchar(12) NOT NULL,
 preco decimal not null,
 foreign key (itid) references (itid)
 
