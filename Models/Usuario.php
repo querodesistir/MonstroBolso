@@ -1,4 +1,4 @@
-<?php
+<?php   //Cadastro e login são funçoes
  class Usuario{
     $idsu,
     $mail,
@@ -17,7 +17,21 @@
    $sql = "INSERT INTO clientes() VALUES (:apelido, :mail, :nivel)"
 
  $usuario = new Usuario();
-   }
+ 
+ header("location: login.html");
+
+   } //fim do cadasu
+
+  function Login(){
+
+  }
+
+   function desaida(){
+
+alert("Até logo...Ou tarde 🥺 ");
+session_destroy();
+header("location: login.html");
+   } //fim do desaida
 
 
  }

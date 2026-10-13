@@ -1,0 +1,5 @@
+ Crie uma página de destino para o formulário anterior. 
+ Ela deverá registrar uma sessão para o usuário caso ele faça o login corretamente (invente um usuário e senha). 
+ Caso ele erre ou tente acessar a página sem estar logado, redirecione-o de volta para o formulário de login.
+  Esta página deve ser acessível sem a necessidade do formulário (entrando diretamente pela sua URL), mas apenas se o usuário estiver logado. 
+ (pode reaproveitar o exercício da aula de formulários mas dividir em 2 páginas, adicionando o tratamento de sessão).

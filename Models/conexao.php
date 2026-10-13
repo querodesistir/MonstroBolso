@@ -1,5 +1,4 @@
 <?php 
-//por no autoload
 class conexao { 
     
     public function __construct(){ 
