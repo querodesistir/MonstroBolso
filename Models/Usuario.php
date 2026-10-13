@@ -1,9 +1,10 @@
 <?php   //Cadastro e login são funçoes
  class Usuario{
-    $idsu,
-    $mail,
-    $senha,
-    $nível,
+    $idsu;
+    $mail;
+    $senha;
+    $nível;
+    $apelido;
 
  function __construct($mail, $senha, $nivel){
     $this->mail = $mail;
@@ -14,11 +15,28 @@
  
  function cadasSu(){
 
-   $sql = "INSERT INTO clientes() VALUES (:apelido, :mail, :nivel)"
+   
+   
+   
+   try {
+     $sql = "INSERT INTO clientes(apelido, email, nivel) VALUES (:apelido, :mail, :nivel)"
+   $con = new conexao();
+   $pdo = $con->pdo;
+     
+    $stmt = $pdo->prepare($sql);
 
- $usuario = new Usuario();
- 
- header("location: login.html");
+    $dados = [];
+    $dados[':apelido'] = $this->apelido;
+    // 5. Executar passando os dados reais
+    $stmt->execute($dados);
+
+    $this->id = $pdo->lastInsertID();
+
+} catch (PDOException $e) {
+    // Caso dê algum erro na conexão ou na query
+    echo "Erro: " . $e->getMessage();
+}
+
 
    } //fim do cadasu
 
@@ -33,6 +51,6 @@ session_destroy();
 header("location: login.html");
    } //fim do desaida
 
-
+//posso fazer uma restrição de que se não estiver logado não pode entrar na loja, quer?
  }
 ?>

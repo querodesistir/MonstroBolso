@@ -1,5 +1,6 @@
 <?php 
 class conexao { 
+    $pdo;
     
     public function __construct(){ 
         $pdo = new PDO("mysql:host=localhost;bdname=Pou, 'root', '', charset= utf8mb4");
@@ -11,9 +12,10 @@ class conexao {
     error_log('Erro na conexão com o banco: ' . $e->getMessage());
     throw $e;
 }
-        
-        return $pdo;
+        $this->pdo = $pdo;
+
     }
+
 
 }
 

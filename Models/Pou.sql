@@ -14,7 +14,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 CREATE TABLE usuario (
-    mail VARCHAR(100) PRIMARY KEY NOT NULL,
+	idsu int PRIMARY KEY not null,
+    mail VARCHAR(100) NOT NULL,
     senha VARCHAR(12) NOT NULL,
     apelido varchar(30) not null,
     nivel INT DEFAUlt 0
