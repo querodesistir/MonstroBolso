@@ -1,49 +1,51 @@
 <?php   //Cadastro e login são funçoes
  class Usuario{
-    $idsu;
-    $mail;
-    $senha;
-    $apelido;
-    $nível;
+    public $idsu;
+   public $mail;
+    public $senha;
+    public $apelido;
+    public $nivel;
     
 
- function __construct($mail, $senha, $nivel){
+ function __construct($mail, $senha,$apelido, $nivel){
     $this->mail = $mail;
     $this->senha = $senha;
+    $this->apelido = $apelido;
     $this->nivel = $nivel;
  }   
  //ids são auto_incremente ou fazemos uma distribuição de numeros 
  
  function cadasSu(){
    try {
-     $sql = "INSERT INTO clientes(mail, apelido, nivel) VALUES (' :mail, :apelido, :nivel')";
+     $sql = "INSERT INTO clientes(mail,senha, apelido, nivel) VALUES (' :mail,:senha, :apelido, :nivel')";
    $con = new conexao();
    $pdo = $con->pdo;
      
     $stmt = $pdo->prepare($sql);
 
     $dados = []; 
-    $dados = [':mail'] = $this->mail;
-    $dados = [':apelido'] = $this->apelido;
-    $dados = [':nivel'] = $this->nivel;
+    $dados[':mail'] = $this->mail; // tirei o igual entre dados e [], funcionou
+    $dados[':senha'] = $this->senha;
+    $dados[':apelido'] = $this->apelido;
+    $dados[':nivel'] = $this->nivel;
     // 5. Executar passando os dados reais
     $stmt->execute($dados);
 
-    $this->id = $pdo->lastInsertID(); //insere id
+    $this->idsu = $pdo->lastInsertID(); //insere id
 
 } catch (PDOException $e) {
-    // Caso dê algum erro na conexão ou na query
     echo "Erro: " . $e->getMessage();
 }
    } //fim do cadasu
 
   function Login(){
-
+//checagem
   }
 
    function desaida(){
 
-alert("Até logo...Ou tarde 🥺 ");
+ echo "<script>alert('Até logo... Ou tarde 🥺');</script>";
+ 
 session_destroy();
 header("location: login.html");
    } //fim do desaida

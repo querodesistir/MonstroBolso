@@ -1,9 +1,10 @@
 <?php 
 class conexao { 
-    $pdo;
+   public $pdo;
     
     public function __construct(){ 
-        $pdo = new PDO("mysql:host=localhost;bdname=Pou, 'root', '', charset= utf8mb4");
+       $pdo = new PDO(
+    "mysql:host=localhost;dbname=Pou;charset=utf8mb4","root","");
 
         try{
             $pdo ->setAttribute(PDO::ATTR_ERRMODE, PDO ::ERRMODE_EXCEPTION);
