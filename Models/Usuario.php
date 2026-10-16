@@ -31,7 +31,7 @@
     // 5. Executar passando os dados reais
     $stmt->execute($dados);
 
-    $this->idsu = $pdo->lastInsertID(); //insere id
+    $this->idsu = $pdo->lastInsertID(); //insere id autocomplete não precisa escrever no bd 
 
 } catch (PDOException $e) {
     echo "Erro: " . $e->getMessage();
@@ -43,12 +43,38 @@
   }
 
    function desaida(){
-
  echo "<script>alert('Até logo... Ou tarde 🥺');</script>";
- 
+
 session_destroy();
 header("location: login.html");
    } //fim do desaida
+
+function lerPerfil() {
+    $con = new conexao();
+    $pdo = $con->pdo;
+
+    $sql = "SELECT mail, apelido, nivel
+            FROM usuario
+            WHERE mail = :mail";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':idsu' => $this->idsu]); //porque tá executando isso dentro?
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}//fim ver perfil
+
+function EditPerfil(){
+   $con = new conexao();
+   $pdo = $con->pdo;
+
+   $sql = "UPDATE usuario set mail = :mail, apelido = :apelido where idsu = :idsu ";
+   $stmt = $pdo->prepare($sql);
+   $stmt->execute();
+
+   return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
 
 //posso fazer uma restrição de que se não estiver logado não pode entrar na loja, quer?
  }
