@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tem certeza?</title>
+</head>
+<body>
+
+    <form id="formApagar" action="apagarConta.php" method="POST">
+        <p>Deseja mesmo apagar sua conta?</p>
+        <button type="button" onclick="simExclusao()">Aim</button>
+        <button type="button" onclick="location: perfil.html">Não</button>
+    </form>
+
+    <script>
+        function simExclusao() {
+            if (confirm('Tem certeza de que deseja apagar sua conta? Essa ação pode ser irreversível.')) {
+                document.getElementById('formApagar').submit();
+            }
+        }
+    </script>
+</body>
+</html>

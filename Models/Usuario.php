@@ -17,7 +17,7 @@
  
  function cadasSu(){
    try {
-     $sql = "INSERT INTO clientes(mail,senha, apelido, nivel) VALUES (' :mail,:senha, :apelido, :nivel')";
+     $sql = "INSERT INTO usuario(mail,senha, apelido, nivel) VALUES (:mail,:senha, :apelido, :nivel)";
    $con = new conexao();
    $pdo = $con->pdo;
      
@@ -25,7 +25,7 @@
 
     $dados = []; 
     $dados[':mail'] = $this->mail; // tirei o igual entre dados e [], funcionou
-    $dados[':senha'] = $this->senha;
+    $dados[':senha'] = password_hash($this->senha, PASSWORD_DEFAULT); //$dados[':senha'] = $this->senha; ia aconselhou trocar
     $dados[':apelido'] = $this->apelido;
     $dados[':nivel'] = $this->nivel;
     // 5. Executar passando os dados reais
@@ -39,7 +39,29 @@
    } //fim do cadasu
 
   function Login(){
-//checagem
+    $con = new conexao();
+    $pdo = $con->pdo;
+
+    $sql = "SELECT idsu, mail, senha, apelido, nivel FROM usuario WHERE mail = :mail";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':mail' => $this->mail]);
+
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$usuario || !password_verify($this->senha, $usuario['senha'])) {
+     echo "<script>alert('senha ou usuarios incorretos. Já fez seu cadastro? ');</script>";
+    header("location: login.php ");
+
+    return false;
+    }else{
+
+    $this->idsu = $usuario['idsu'];
+    $this->apelido = $usuario['apelido'];
+    $this->nivel = $usuario['nivel'];
+
+    return true;
+    }
   }
 
    function desaida(){
@@ -53,9 +75,7 @@ function lerPerfil() {
     $con = new conexao();
     $pdo = $con->pdo;
 
-    $sql = "SELECT mail, apelido, nivel
-            FROM usuario
-            WHERE mail = :mail";
+    $sql = "SELECT mail, apelido, nivel FROM usuario WHERE idsu = :idsu";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':idsu' => $this->idsu]); //porque tá executando isso dentro?
@@ -69,13 +89,54 @@ function EditPerfil(){
 
    $sql = "UPDATE usuario set mail = :mail, apelido = :apelido where idsu = :idsu ";
    $stmt = $pdo->prepare($sql);
-   $stmt->execute();
+   $stmt->execute([
+      ':mail' => $this->mail, 
+      ':apelido => $this->apelido,',
+      ':idsu' => $this->idsu
+   ]);
 
-   return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function mudaSenha($novaSenha) {
+    $con = new conexao();
+    $pdo = $con->pdo;
 
+    $sql = "UPDATE usuario SET senha = :senha WHERE idsu = :idsu";
 
-//posso fazer uma restrição de que se não estiver logado não pode entrar na loja, quer?
- }
+    $stmt = $pdo->prepare($sql);
+
+    return $stmt->execute([
+        ':senha' => password_hash($novaSenha, PASSWORD_DEFAULT),
+        ':idsu' => $this->idsu
+    ]); }
+
+function apagaConta(){
+ $con = new conexao();
+ $pdo = $con->pdo;
+
+try {
+        $pdo->beginTransaction();
+
+        $sql = "DELETE FROM usuario WHERE idsu = :idsu";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':idsu' => $this->idsu
+        ]);
+
+        if ($stmt->rowCount() === 0) {
+            $pdo->rollBack();
+            return false;
+        }else{
+        $pdo->commit();
+        return true;
+        }
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        throw $e;
+    }
+    
+}
 ?>
