@@ -1,6 +1,6 @@
 <?php
 require 'autoload.php';
 
-$us = new Usuario();
-$us->apelido = 'sadasds';//...
-$us->cadasSu();
+
+$us = new Usuario('teste@email.com','senha123', 'JogadorTeste',0);
+

@@ -1,7 +1,7 @@
 <?php   //Cadastro e login são funçoes
  class Usuario{
     public $idsu;
-   public $mail;
+    public $mail;
     public $senha;
     public $apelido;
     public $nivel;
@@ -16,14 +16,14 @@
  //ids são auto_incremente ou fazemos uma distribuição de numeros 
  
  function cadasSu(){
-   try {
-     $sql = "INSERT INTO usuario(mail,senha, apelido, nivel) VALUES (:mail,:senha, :apelido, :nivel)";
    $con = new conexao();
    $pdo = $con->pdo;
+   try {
+     $sql = "INSERT INTO usuario(mail,senha, apelido, nivel) VALUES (:mail,:senha, :apelido, :nivel)";
+  
      
     $stmt = $pdo->prepare($sql);
 
-    $dados = []; 
     $dados[':mail'] = $this->mail; // tirei o igual entre dados e [], funcionou
     $dados[':senha'] = password_hash($this->senha, PASSWORD_DEFAULT); //$dados[':senha'] = $this->senha; ia aconselhou trocar
     $dados[':apelido'] = $this->apelido;
@@ -31,7 +31,7 @@
     // 5. Executar passando os dados reais
     $stmt->execute($dados);
 
-    $this->idsu = $pdo->lastInsertID(); //insere id autocomplete não precisa escrever no bd 
+    $this->idsu = $pdo->lastInsertID(); 
 
 } catch (PDOException $e) {
     echo "Erro: " . $e->getMessage();
@@ -64,12 +64,13 @@
     }
   }
 
-   function desaida(){
- echo "<script>alert('Até logo... Ou tarde 🥺');</script>";
-
-session_destroy();
-header("location: login.html");
-   } //fim do desaida
+   public function desaida() {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
+    }
+    header("Location: login.html");
+    exit;
+}
 
 function lerPerfil() {
     $con = new conexao();
@@ -91,7 +92,7 @@ function EditPerfil(){
    $stmt = $pdo->prepare($sql);
    $stmt->execute([
       ':mail' => $this->mail, 
-      ':apelido => $this->apelido,',
+      ':apelido' => $this->apelido,
       ':idsu' => $this->idsu
    ]);
 
@@ -136,7 +137,7 @@ try {
         }
 
         throw $e;
-    }
-    
-}
+    } 
+                    }
+ }
 ?>
