@@ -1,4 +1,4 @@
-<?php   //Cadastro e login são funçoes
+<?php 
  class Usuario{
     public $idsu;
     public $mail;
@@ -13,7 +13,6 @@
     $this->apelido = $apelido;
     $this->nivel = $nivel;
  }   
- //ids são auto_incremente ou fazemos uma distribuição de numeros 
  
  function cadasSu(){
    $con = new conexao();
@@ -138,6 +137,6 @@ try {
 
         throw $e;
     } 
-                    }
- }
+                    } //fim de apagaConta
+ } //fim da classe
 ?>

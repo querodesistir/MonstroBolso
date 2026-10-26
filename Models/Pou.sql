@@ -23,12 +23,8 @@ CREATE TABLE usuario (
 
 create table tipo(
 	tipid int not null primary key,
+	especie varchar(50) not null,
 	elemento varchar(10)
-);
-
-create table especie(
-	estpid int not null primary key,
-	esper varchar(12) not null
 );
 
 create table monstro (
@@ -36,6 +32,7 @@ create table monstro (
 	nome varchar(30) not null UNIQUE,
 	dano int not null,
 	hp int not null,
+	ahp int,
 	def int,
 	estpid int not null,
 	tipid int not null,
