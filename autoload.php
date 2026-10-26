@@ -3,7 +3,7 @@
 spl_autoload_register(function($classe) {
 
     $pastas = [
-        __DIR__ . "/controlls/",
+        __DIR__ . "/controllers/",
         __DIR__ . "/Models/"
     ];
 

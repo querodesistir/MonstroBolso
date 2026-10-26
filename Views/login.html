@@ -6,13 +6,24 @@
     <title>Login</title>
 </head>
 <body>
-    <form action="login.php" method="post" enctype="multipart/form-data">
+    <script>
+const parametros = new URLSearchParams(window.location.search);
+const erro = parametros.get('erro');
+
+if (erro === 'campos') {
+    alert('Login interrompido: preencha o e-mail e a senha.');
+} else if (erro === 'credenciais') {
+    alert('Login falhou: e-mail ou senha incorretos. Já fez seu cadastro?');
+}
+</script>
+    <form action="../Controls/login.php" method="post" enctype="multipart/form-data">
 <label for="login"> Email </label><br>
 <input type="text" id="mail" name="mail" placeholder="Ex.:jojo@gmail.com">
 <label for="senha"> Senha </label><br>
 <input type="text" id="senha" name="senha" placeholder="ex.: Jojo*123">
+<br><button type="submit">Entrar</button><br>
 </form>
-<button type="submit">Entrar</button><br>
+
 <a href="cadastro.html">Cadastrar</a>
 </body>
 </html>
