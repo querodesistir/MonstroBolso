@@ -54,13 +54,6 @@ create table itens(
 itid int not null primary key,
 nomi varchar(12) not null,
 nefeito int not null,
-descri varchar(200)
-);
-
-create table loja(
-itid int NOT NULL,
-itnome varchar(12) NOT NULL,
 preco decimal not null,
-foreign key (itid) references (itid)
-
+descri varchar(200)
 );
