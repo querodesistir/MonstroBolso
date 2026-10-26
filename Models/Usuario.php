@@ -151,6 +151,9 @@ try {
  function setNivel($nivel){
     $this->nivel = $nivel;
  }
+ function setIdsu($idsu){
+    $this->idsu = $idsu;
+ }
  function getMail(){
     return $this->mail;
  }
@@ -163,6 +166,8 @@ try {
  function getNivel(){
     return $this->nivel;
  }
- 
-                    } //fim da classe
+ function getIdsu(){
+    return $this->idsu;
+ }
+ } //fim da classe
 ?>

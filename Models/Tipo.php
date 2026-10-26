@@ -24,12 +24,18 @@ class Tipo{
  function setElemento($elemento){
   $this->elemento = $elemento;
    }
+function setTipo($tipid){
+  $this->tipid = $tipid;
+}
 
 function getEspec(){
   return $this->especie;
 }
 function getElemento(){
   return $this->elemento;
+}
+function getTipo(){
+  return $this->tipid;
 }
 
 } ?>
