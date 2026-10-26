@@ -138,5 +138,31 @@ try {
         throw $e;
     } 
                     } //fim de apagaConta
- } //fim da classe
+ 
+ function setMail($mail){
+    $this->mail = $mail;
+ }
+ function setSen($mail){
+    $this->senha = $senha;
+ }
+ function setApelido($apelido){
+    $this->apelido = $apelido;
+ }
+ function setNivel($nivel){
+    $this->nivel = $nivel;
+ }
+ function getMail(){
+    return $this->mail;
+ }
+ function getSen(){
+    return $this->senha;
+ }
+ function getApelido(){
+    return $this->apelido;
+ }
+ function getNivel(){
+    return $this->nivel;
+ }
+ 
+                    } //fim da classe
 ?>

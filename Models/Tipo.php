@@ -9,10 +9,27 @@ class Tipo{
     $this->especie = $especie;
     $this->elemento = $elemento;
   }
- 
-  function meuLugar(){
+  //não deveria ter uma tabela habitat? ou um onclick com a informação do jogo tá bom?
+ //espaço favoravel para o monstro (de acorde com seu tipo) da vantagem;
+ //como verifica
+  function meuLugar(){ 
   $con = new conecxao();
-  }
+  $pdo = $con->pdo;
+ //essa função não tem que ficar na união deles?
+}//fim do meu lugar
+ 
+ function setEspec($especie){
+  $this->especie = $especie;
+ }
+ function setElemento($elemento){
+  $this->elemento = $elemento;
+   }
 
+function getEspec(){
+  return $this->especie;
 }
- ?>
+function getElemento(){
+  return $this->elemento;
+}
+
+} ?>
