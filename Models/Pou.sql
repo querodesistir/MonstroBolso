@@ -40,7 +40,8 @@ foreign key (estpid) references especie(estpid),
 foreign key (tipid) references tipo(tipid)
 );
 
-create table DeckBattle(
+create table deckbattle(
+ideck int PRIMARY KEY
 idm1 int not null,
 idm2 int not null,
 idm3 int not null,
@@ -56,4 +57,13 @@ nomi varchar(12) not null,
 nefeito int not null,
 preco decimal not null,
 descri varchar(200)
+);
+
+CREATE TABLE logbatalhas(
+idlog int primary key,
+ideck int, 
+feridas int,
+dano INT,
+cura INT,
+foreign KEY (ideck) references deckbattle(ideck)
 );
