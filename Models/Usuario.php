@@ -1,10 +1,10 @@
 <?php 
  class Usuario{
-    public $idsu;
-    public $mail;
-    public $senha;
-    public $apelido;
-    public $nivel;
+    private $idsu;
+    private $mail;
+   private $senha;
+    private $apelido;
+    private $nivel;
     
 
  function __construct($mail, $senha,$apelido, $nivel){

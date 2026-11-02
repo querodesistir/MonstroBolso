@@ -1,14 +1,14 @@
 <?php
  class Monstro extends Tipo{
-    public $id;
-    public $nome;
-    public $dano;
-    public $hp;
-    public $ahp;
-    public $def;
+    private $id;
+    private $nome;
+    private $dano;
+    private $hp;
+    private $ahp;
+    private $def;
 
 
-     function __construct(id, nome, dano,hp, def) {
+     function __construct($id, $nome, $dano,$hp, $def) {
         $this->nome = $nome;
         $this->dano = $dano;
         $this->hp = $hp;
@@ -16,13 +16,42 @@
         $this->def = $def;
     }
 
-    function Atacada(){
-        $con = new conexao();
-        $pdo = $con->pdo;
+function setId($id){
+    $this->id= $id;
+}
+function setNome($nome){
+    $this->nome = $nome;
+}
+function setDano($dano){
+    $this->dano= $dano;
+}
+function setHp($hp){
+    $this->hp = $hp;
+}
+function setAhp($ahp){
+    $this->ahp= $ahp;
+}
+function setDef($def){
+    $this->def = $def;
+}
 
-
-    }
-
+function getId(){
+  return $this->id;
+}
+function getNome(){
+  return $this->nome;
+}
+function getDano(){
+  return $this->dano;
+}
+function getHp(){
+  return $this->Hp;
+}
+function getAhp(){
+  return $this->ahp;
+}
+function getDef(){
+  return $this->def;
+}
  }
-
 ?>

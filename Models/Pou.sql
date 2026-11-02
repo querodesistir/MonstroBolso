@@ -23,7 +23,6 @@ CREATE TABLE usuario (
 
 create table tipo(
 	tipid int not null primary key,
-	especie varchar(50) not null,
 	elemento varchar(10)
 );
 
@@ -61,8 +60,7 @@ descri varchar(200)
 
 CREATE TABLE logbatalhas(
 idlog int primary key,
-ideck int, 
-feridas int,
+ideck int,
 dano INT,
 cura INT,
 foreign KEY (ideck) references deckbattle(ideck)

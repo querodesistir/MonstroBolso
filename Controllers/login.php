@@ -8,7 +8,7 @@ $mail = trim($_POST['mail'] ?? '');
 $senha = $_POST['senha'] ?? '';
 
 if ($mail === '' || $senha === '') {
-    header("Location: ../login.html?erro=campos");
+    header("Location: ../Views/login.html?erro=campos");
     exit;
 }
 
@@ -19,10 +19,10 @@ if ($usuario->Login()) {
     $_SESSION['idsu'] = $usuario->getIdsu();
     $_SESSION['apelido'] = $usuario->getApelido();
 
-    header("Location: fablica.php");
+    header("Location: ../Views/Inicio.html");
     exit;
 }
 
-header("Location: ../login.html?erro=credenciais");
+header("Location: ../Views/login.html?erro=credenciais");
 exit;
 ?>
