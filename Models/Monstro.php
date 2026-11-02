@@ -16,6 +16,19 @@
         $this->def = $def;
     }
 
+function buscarMonstro($nome) {
+    $con = new conexao();
+    $pdo = $con->pdo;
+
+    $sql = "SELECT * FROM Monstro WHERE nome like :nome";
+
+    $stmt = $pdo->prepare($sql);
+   $stmt->bindValue(':nome', '%' . trim($nome) . '%', PDO::PARAM_STR);
+    $stmt->execute();
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 function setId($id){
     $this->id= $id;
 }

@@ -4,6 +4,7 @@ private  $ideck;
 private  $idm1; 
 private $idm2; 
 private  $idm3; 
+private $titulo;
 
 function __construct($idm1, $idm2, $idm3, $titulo) {
         $this->idm1 = $idm1;
@@ -12,5 +13,11 @@ function __construct($idm1, $idm2, $idm3, $titulo) {
         $this->titulo = $titulo;
     } //fim construct
 
-} //fim classe que antes comi
+} 
+
+function EditaDeck(){
+
+}
+
+
 ?>
