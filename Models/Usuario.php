@@ -5,13 +5,14 @@
    private $senha;
     private $apelido;
     private $nivel;
-    
+    private $dindin;
 
- function __construct($mail, $senha,$apelido, $nivel){
+ function __construct($mail, $senha,$apelido, $nivel = 0){
     $this->mail = $mail;
     $this->senha = $senha;
     $this->apelido = $apelido;
     $this->nivel = $nivel;
+    $this->dindin = $dindin;
  }   
  
  function cadasSu(){
@@ -23,11 +24,12 @@
      
     $stmt = $pdo->prepare($sql);
 
-    $dados[':mail'] = $this->mail; // tirei o igual entre dados e [], funcionou
+    $dados[':mail'] = $this->mail; 
     $dados[':senha'] = password_hash($this->senha, PASSWORD_DEFAULT); //$dados[':senha'] = $this->senha; ia aconselhou trocar
     $dados[':apelido'] = $this->apelido;
     $dados[':nivel'] = $this->nivel;
-    // 5. Executar passando os dados reais
+    $dados[':dindin'] = $this->dindin;
+
     $stmt->execute($dados);
 
     $this->idsu = $pdo->lastInsertID(); 
@@ -41,7 +43,7 @@
     $con = new conexao();
     $pdo = $con->pdo;
 
-    $sql = "SELECT idsu, mail, senha, apelido, nivel FROM usuario WHERE mail = :mail";
+    $sql = "SELECT idsu, mail, senha, apelido, nivel, dindin FROM usuario WHERE mail = :mail";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':mail' => $this->mail]);
@@ -58,6 +60,7 @@
     $this->idsu = $usuario['idsu'];
     $this->apelido = $usuario['apelido'];
     $this->nivel = $usuario['nivel'];
+    $this->dindin = $usuario['dindin'];
 
     return true;
     }
@@ -87,12 +90,13 @@ function EditPerfil(){
    $con = new conexao();
    $pdo = $con->pdo;
 
-   $sql = "UPDATE usuario set mail = :mail, apelido = :apelido where idsu = :idsu ";
+   $sql = "UPDATE usuario set mail = :mail, apelido = :apelido, didin = :dindin where idsu = :idsu ";
    $stmt = $pdo->prepare($sql);
    $stmt->execute([
       ':mail' => $this->mail, 
       ':apelido' => $this->apelido,
-      ':idsu' => $this->idsu
+      ':idsu' => $this->idsu,
+      ':dindin' => $this->dindin
    ]);
 
 }
@@ -154,6 +158,9 @@ try {
  function setIdsu($idsu){
     $this->idsu = $idsu;
  }
+  function setDin($dindin){
+    $this->dindin = $dindin;
+ }
  function getMail(){
     return $this->mail;
  }
@@ -168,6 +175,9 @@ try {
  }
  function getIdsu(){
     return $this->idsu;
+ }
+  function getDin(){
+    return $this->dindin;
  }
  } //fim da classe
 ?>

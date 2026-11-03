@@ -4,16 +4,19 @@
     private $nome;
     private $dano;
     private $hp;
-    private $ahp;
+    private $ahp; //hp atual
     private $def;
+    private $prio; //prioridade
+    private $danoEspecial;
 
-
-     function __construct($id, $nome, $dano,$hp, $def) {
+     function __construct($id, $nome, $dano,$hp = 100, $def, $prio, $danoEspecial) {
         $this->nome = $nome;
         $this->dano = $dano;
         $this->hp = $hp;
         $this->ahp = $ahp;
         $this->def = $def;
+        $this->prio = $prio;
+        $this->danoEspecial = $danoEspecial;
     }
 
 function buscarMonstro($nome) {
@@ -28,6 +31,18 @@ function buscarMonstro($nome) {
 
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+function ListarMonstroPmontarDeck() {
+    $con = new conexao();
+    $pdo = $con->pdo;
+
+    $sql = "SELECT id,nome,dano, def, denoEspecial FROM Monstro";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+
+    return $stmt->fetchALL(PDO::FETCH_ASSOC);
+}
+
 
 function setId($id){
     $this->id= $id;

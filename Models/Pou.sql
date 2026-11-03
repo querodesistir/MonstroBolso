@@ -18,6 +18,7 @@ CREATE TABLE usuario (
     mail VARCHAR(100) UNIQUE NOT NULL,
     senha VARCHAR(12) NOT NULL,
     apelido varchar(30) not null,
+	dindin int default 10,
     nivel INT DEFAUlt 0
 );
 
@@ -30,9 +31,11 @@ create table monstro (
 	id int not null primary key,
 	nome varchar(30) not null UNIQUE,
 	dano int not null,
-	hp int not null,
+	hp int default 100,
 	ahp int,
 	def int,
+	prioridade int,
+    danoEspecial int,
 	estpid int not null,
 	tipid int not null,
 foreign key (estpid) references especie(estpid),

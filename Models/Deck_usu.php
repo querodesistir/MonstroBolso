@@ -7,7 +7,7 @@ class Deck_usu {
         $this->ideck = $ideck;
         $this->idsu = $idsu;
     }
-     function associaUser() {
+     function associaUser() {  //recomendação do chat, achei inutil
         $con = new conexao();
         $pdo = $con->pdo;
 
