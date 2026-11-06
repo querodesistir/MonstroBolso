@@ -34,9 +34,8 @@ create table monstro (
 	hp int default 100,
 	ahp int,
 	def int,
-	prioridade int,
+	prio int,
     danoEspecial int,
-	estpid int not null,
 	tipid int not null,
 foreign key (estpid) references especie(estpid),
 foreign key (tipid) references tipo(tipid)
@@ -68,3 +67,13 @@ dano INT,
 cura INT,
 foreign KEY (ideck) references deckbattle(ideck)
 );
+
+INSERT INTO TIPO(tipid, elemento);
+VALUES(2, "aquatico");
+INSERT INTO TIPO(tipid, elemento);
+VALUES(1, "voador");
+
+INSERT INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid)
+VALUES(01, "Fogi", 5, 100, 100, 1, 20, 2);
+INSERT INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid)
+VALUES(01, "Quero-quero", 10, 100, 100, 1, 30, 1);

@@ -12,7 +12,6 @@ if ($mail === '' || $senha === '') {
     exit;
 }
 
-$usuario = new Usuario($mail, $senha);
 
 if ($usuario->Login()) {
     $_SESSION['logado'] = true;
