@@ -1,5 +1,5 @@
 <?php
- class Monstro extends Tipo{
+ class Monstro Tipo{
     private $id;
     private $nome;
     private $dano;
@@ -9,7 +9,7 @@
     private $prio; //prioridade
     private $danoEspecial;
 
-     function __construct($id, $nome, $dano,$hp = 100, $def, $prio, $danoEspecial) {
+     function __construct($id, $nome, $dano,$hp = 100, $ahp, $def, $prio, $danoEspecial) {
         $this->nome = $nome;
         $this->dano = $dano;
         $this->hp = $hp;
