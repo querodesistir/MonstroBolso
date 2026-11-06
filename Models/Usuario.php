@@ -4,15 +4,16 @@
     private $mail;
    private $senha;
     private $apelido;
+   private $dindin;
     private $nivel;
-    private $dindin;
 
- function __construct($mail, $senha,$apelido, $nivel = 0){
+
+ function __construct($mail, $senha,$apelido,$dindin, $nivel = 0){
     $this->mail = $mail;
     $this->senha = $senha;
     $this->apelido = $apelido;
-    $this->nivel = $nivel;
     $this->dindin = $dindin;
+    $this->nivel = $nivel;
  }   
  
  function cadasSu(){
@@ -27,8 +28,8 @@
     $dados[':mail'] = $this->mail; 
     $dados[':senha'] = password_hash($this->senha, PASSWORD_DEFAULT); //$dados[':senha'] = $this->senha; ia aconselhou trocar
     $dados[':apelido'] = $this->apelido;
-    $dados[':nivel'] = $this->nivel;
     $dados[':dindin'] = $this->dindin;
+    $dados[':nivel'] = $this->nivel;
 
     $stmt->execute($dados);
 

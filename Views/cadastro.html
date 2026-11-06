@@ -4,8 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        Body{
+            background-color: antiquewhite;
+        }
+       .cadastro{
+        background-color: plum;
+   display: flex;
+  justify-content: center; 
+  align-items: center;  
+  margin-top: 20%;
+  margin-bottom: 20%;
+       }
+    </style>
 </head>
 <body>
+ <div class="cadastro">
     <form action="cadastro.php" method="post" enctype="multipart/form-data">
         <label for="mail">Email: </label>
         <input type="text" id="mail" name="mail"> <br>
@@ -14,7 +28,8 @@
        <br>
        <label for="senha">Senha: </label>
        <input type="text" id="senha" name="senha">
-    </form>
-    <button type="submit">Concluir</button>
+    </form><br>
+    <button type="submit" id="subemeter">Concluir</button>
+    </div>
 </body>
 </html>
