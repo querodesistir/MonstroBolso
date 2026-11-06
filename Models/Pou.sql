@@ -24,6 +24,7 @@ create table IF NOT EXISTS monstro (
 	prio int,
     danoEspecial int,
 	tipid int not null,
+	nodeck boolean default false,
 foreign key (tipid) references tipo(tipid)
 );
 

@@ -1,5 +1,5 @@
 <?php
- class Monstro Tipo{
+ class Monstro{
     private $id;
     private $nome;
     private $dano;
@@ -8,8 +8,9 @@
     private $def;
     private $prio; //prioridade
     private $danoEspecial;
+    private $nodeck;
 
-     function __construct($id, $nome, $dano,$hp = 100, $ahp, $def, $prio, $danoEspecial) {
+     function __construct($id, $nome, $dano,$hp = 100, $ahp, $def, $prio, $danoEspecial, $nodeck) {
         $this->nome = $nome;
         $this->dano = $dano;
         $this->hp = $hp;
@@ -17,6 +18,7 @@
         $this->def = $def;
         $this->prio = $prio;
         $this->danoEspecial = $danoEspecial;
+         $this->nodeck = $nodeck;  //fazer set e get desse
     }
 
 function buscarMonstro($nome) {
