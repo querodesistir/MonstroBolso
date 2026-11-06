@@ -4,6 +4,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f172a; /* Azul escuro corporativo/jogo */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 350px;
+}
+
+
+
+
+.game-logo {
+    max-width: 240px;
+    height: auto;
+    margin-bottom: 12px;
+}
+
+
+.game-card {
+    background: rgba(15, 23, 42, 0.85); /* Fundo translúcido */
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 25px 20px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+
+.input-group {
+    margin-bottom: 16px;
+}
+
+
+.input-group input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(10, 15, 25, 0.6);
+    border: 1px solid #334155;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+
+.input-group input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
+
+.input-group input::placeholder {
+    color: #94a3b8;
+}
+
+
+.options-row {
+    margin-bottom: 20px;
+}
+
+
+.checkbox-container {
+    color: #38bdf8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+
+.checkbox-container input {
+    cursor: pointer;
+    accent-color: #3b82f6;
+    width: 16px;
+    height: 16px;
+}
+
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(180deg, #f97316 0%, #c2410c 100%);
+    border: 1px solid #fb923c;
+    border-radius: 4px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: filter 0.2s, transform 0.1s;
+}
+
+
+.btn-login:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+
+.btn-login:active {
+    transform: translateY(1px);
+}
+
+
+.link-cadastro {
+    display: block;
+    text-align: center;
+    margin-top: 18px;
+    color: #38bdf8;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.link-cadastro:hover {
+    color: #7dd3fc;
+    text-decoration: underline;
+}
+
+
+
+    </style>
 </head>
 
 <body>
@@ -18,17 +162,28 @@
             alert('Login falhou: e-mail ou senha incorretos. Já fez seu cadastro?');
         }
     </script>
+    
+    <div class="login-container">
+        <img src="../imagens/logo.png" alt="MonstroBolso Logo" class="game-logo">
 
-    <form action="../Controllers/login.php" method="POST">
 
-        <label for="mail">E-mail</label><br>
-        <input type="email" id="mail" name="mail" placeholder="Ex.: jojo@gmail.com" required> <br>
-        <label for="senha">Senha</label><br>
-        <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required> <br>
-        <button type="submit">Entrar</button>
-    </form>
-    <br>
-    <a href="cadastro.html">Cadastrar</a>
+        <form action="login.php" method="post" enctype="multipart/form-data" class="game-card">
+            <div class="input-group">
+                <input type="email" id="mail" name="mail" placeholder="Email" required>
+            </div>
 
+            <div class="input-group">
+                <input type="password" id="senha" name="senha" placeholder="Senha" required>
+            </div>
+
+            <div class="options-row">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="remember"> Lembrar Senha
+                </label>
+            </div>
+            <button type="submit" class="btn-login">Entrar no Jogo</button>
+            <a href="cadastro.html" class="link-cadastro">Criar nova conta</a>
+        </form>
+    </div>
 </body>
 </html>
