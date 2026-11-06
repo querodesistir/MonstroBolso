@@ -11,7 +11,8 @@ if ($mail === '' || $senha === '') {
     header("Location: ../Views/login.html?erro=campos");
     exit;
 }
-
+ 
+$usuario = new Usuario($mail, $senha);
 
 if ($usuario->Login()) {
     $_SESSION['logado'] = true;

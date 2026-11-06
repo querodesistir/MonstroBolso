@@ -8,7 +8,7 @@
     private $nivel;
 
 
- function __construct($mail, $senha,$apelido,$dindin, $nivel = 0){
+ function __construct($mail, $senha,$apelido = NULL ,$dindin = 0 , $nivel = 0){
     $this->mail = $mail;
     $this->senha = $senha;
     $this->apelido = $apelido;
@@ -147,7 +147,7 @@ try {
  function setMail($mail){
     $this->mail = $mail;
  }
- function setSen($mail){
+ function setSen($senha){
     $this->senha = $senha;
  }
  function setApelido($apelido){
