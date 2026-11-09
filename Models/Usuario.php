@@ -47,17 +47,21 @@
     $sql = "SELECT idsu, mail, senha, apelido, nivel, dindin FROM usuario WHERE mail = :mail";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':mail' => $this->mail]);
+    $stmt->execute([':idsu' => $this->idsu]);
 
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$usuario || !password_verify($this->senha, $usuario['senha'])) {
-     echo "<script>alert('senha ou usuarios incorretos. Já fez seu cadastro? ');</script>";
     header("location: login.php ");
-
-    return false;
+  exit;
     }else{
-
+// SE ACHAR O USUÁRIO: Grava os dados na Sessão do PHP
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['usuario_id'] = $usuario['idsu'];
+            $_SESSION['usuario_apelido'] = $usuario['apelido'];
+            
     $this->idsu = $usuario['idsu'];
     $this->apelido = $usuario['apelido'];
     $this->nivel = $usuario['nivel'];

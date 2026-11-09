@@ -7,8 +7,12 @@
     <style>
 
      body{
-        background-image: url(imagens/backInicio.png);
-        background-repeat: no-repeat;
+background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(imagens/backInicio.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    margin: 0;
      }
     ul {
         list-style: none;
@@ -22,10 +26,7 @@
     padding:77px  0;
     list-style-type: style none;
     margin: 0;
-     
        }
-
-
        .menu li{
        background-color:rgb(143, 14, 14);
        border:3px solid;
@@ -43,19 +44,52 @@
         font-weight:bold;
         font-size:30px;
        }
-
-
      
      .menu li:hover{
         background-color: aquamarine;
         transform:translateY(-5px);
         border-color:cadetblue;
-     }
+     }  /* css da janela flutuante */
+       dialog {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
        
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px); /* Deixa o fundo levemente borrado */
+        }
+        iframe {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
     </style>
     
 </head>
 <body>
+       <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const janela = document.getElementById('janelaBloqueio');
+
+    // Pergunta para o PHP se o usuário está logado
+            fetch('Usulogado.php')
+                .then(resposta => resposta.json())
+                .then(dados => {
+      if (dados.logado === false) {
+         janela.showModal(); // Força a abertura da janela flutuante por cima de tudo
+       } else {
+    console.log("Usuário autenticado com sucesso: " + dados.apelido);
+                    }
+       })
+                .catch(erro => console.error("Erro na comunicação com o servidor:", erro));
+        });
+    </script>
+
    <nav class="menu">
         <ul>
            
@@ -65,5 +99,13 @@
             <li><a href="">loja</a></li>
         </ul>
     </nav>
+
+    <dialog id="janelaBloqueio">
+        <h2>Acesso não autorizado!</h2>
+        <p>Não encontramos seu usuário ativo no sistema. Por favor, identifique-se abaixo:</p>
+        
+        <!-- EXIBE A OUTRA PÁGINA HTML AQUI DENTRO -->
+        <iframe src="login.html" width="450" height="350"></iframe>
+    </dialog>
 </body>
 </html>
