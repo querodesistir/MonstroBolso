@@ -72,22 +72,15 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
     
 </head>
 <body>
-       <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const janela = document.getElementById('janelaBloqueio');
-
-    // Pergunta para o PHP se o usuário está logado
-            fetch('Usulogado.php')
-                .then(resposta => resposta.json())
-                .then(dados => {
-      if (dados.logado === false) {
-         janela.showModal(); // Força a abertura da janela flutuante por cima de tudo
-       } else {
-    console.log("Usuário autenticado com sucesso: " + dados.apelido);
-                    }
-       })
-                .catch(erro => console.error("Erro na comunicação com o servidor:", erro));
-        });
+    <script>
+        fetch('Usulogado.php')
+            .then(resposta => resposta.json())
+            .then(dados => {
+                if (dados.logado === false) {
+                    window.location.href = 'login.html';
+                }
+            })
+            .catch(erro => console.error("Erro na comunicação com o servidor:", erro));
     </script>
 
    <nav class="menu">
@@ -95,17 +88,10 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
            
             <li><a>Perfil</a></li>
             <li><a href="">Time</a></li>
-            <li><a href="arena.html">Hub de batalha</a></li>
-            <li><a href="">loja</a></li>
+            <li><a href="arena.html">Batalha</a></li>
+            <li><a href="">Loja</a></li>
         </ul>
     </nav>
 
-    <dialog id="janelaBloqueio">
-        <h2>Acesso não autorizado!</h2>
-        <p>Não encontramos seu usuário ativo no sistema. Por favor, identifique-se abaixo:</p>
-        
-        <!-- era para mostrar login se não estiver logado -->
-        <iframe src="login.html" width="450" height="350"></iframe>
-    </dialog>
 </body>
 </html>

@@ -1,45 +1,29 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteio de Cenário</title>
+    <title>Arena</title>
+
     <style>
-        #arena {
-            width: 100%;
-            max-width: 500px;
-            margin: 20px auto;
-            border: 3px solid #333;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        #lindo {
-            border: 1px solid rgb(59, 14, 150);
-            padding: 10px; 
-            height: 300px;
-            /* O background caso a imagem falhe */
-            background-color: rgb(84, 130, 221); 
-            /* Transição suave ao mudar de cenário */
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            background-color: rgb(84, 130, 221);
             background-size: cover;
             background-position: center;
-            color: #fff;
-            text-shadow: 1px 1px 3px #000;
+            background-repeat: no-repeat;
         }
     </style>
 </head>
-<body>
 
-    <div id="arena">
-        <div id="lindo">
-            <h3 id="nome-cenario">Carregando...</h3>
-            <p id="bonus-texto">Bônus: Calculando... <?php </p>
-            <a href="#" id="link-cenario">Ver detalhes do habitat</a>
-        </div>
-    </div>
+<body>
 
     <script>
         let ns = Math.floor(Math.random() * 6) + 1;
-        
+
         let nomeCenario = "";
         let imagemUrl = "";
         let bonusHabitat = 0;
@@ -47,41 +31,43 @@
         switch (ns) {
             case 1:
                 nomeCenario = "bosque";
-                imagemUrl = "../bosque.png";
-                bonusHabitat = 15; // Exemplo: +15 de agilidade
+                imagemUrl = "imagem/bosque.png";
+                bonusHabitat = 15;
                 break;
+
             case 2:
                 nomeCenario = "desfiladeiro";
-                imagemUrl = "../desfiladeiro.png";
+                imagemUrl = "imagem/desfiladeiro.png";
                 bonusHabitat = 15;
                 break;
+
             case 3:
                 nomeCenario = "pantano";
-                imagemUrl = "../pantano.png";
-                bonusHabitat = 15;
+                imagemUrl = "imagem/pantano.png";
+                bonusHabitat = 5;
                 break;
+
             case 4:
                 nomeCenario = "estradapedra";
-                imagemUrl = "../estradapedra";
-                bonusHabitat = 15;
+                imagemUrl = "imagem/estradapedra.png";
+                bonusHabitat = 5;
                 break;
+
             case 5:
                 nomeCenario = "praianoturna";
-                imagemUrl = "../praianotura";
-                bonusHabitat = 15;
+                imagemUrl = "imagem/praianoturna.png";
+                bonusHabitat = 5;
                 break;
+
             default:
                 nomeCenario = "arena Padrão";
-                imagemUrl = "padrao.png";
+                imagemUrl = "imagem/padrao.png";
                 bonusHabitat = 0;
                 break;
         }
-        document.getElementById("lindo").style.backgroundImage = `url('${imagemUrl}')`;
-        
-        document.getElementById("nome-cenario").innerText = `Cenário: ${nomeCenario} (ID: ${ns})`;
-        document.getElementById("bonus-texto").innerText = `Bônus de Habitat: +${bonusHabitat}`;
-        
-        document.getElementById("link-cenario").href = imagemUrl;
+
+        document.body.style.backgroundImage = `url('${imagemUrl}')`;
     </script>
+
 </body>
 </html>
