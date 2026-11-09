@@ -37,8 +37,11 @@ function __construct($idm1, $idm2, $idm3, $titulo) {
 }
    } //fim do cadasu
 
-function EditaDeck(){
-
+function Addeck(){ //ESSA FUNÇÃO É PARA ESTAR ONDE?
+    $con = new conexao();
+    $pdo = $con->pdo;
+    try {
+        $sql = "UPDATE DECKBATTLE SET ";
 }
 
 
