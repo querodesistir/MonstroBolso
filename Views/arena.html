@@ -3,26 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sorteio de Cenário</title>
     <style>
-#loglindo{
-     border: 1px solid rgb(59, 14, 150);
-     padding: 10px; 
-     height: 300px;
-     background: rgb(84, 130, 221); 
-     color: #fff;
-}
+        #arena {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            border: 3px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #lindo {
+            border: 1px solid rgb(59, 14, 150);
+            padding: 10px; 
+            height: 300px;
+            /* O background caso a imagem falhe */
+            background-color: rgb(84, 130, 221); 
+            /* Transição suave ao mudar de cenário */
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            text-shadow: 1px 1px 3px #000;
+        }
     </style>
 </head>
 <body>
+
     <div id="arena">
-    
-    <div id="loglindo"><a>Ave maria</a></div>
-</div>
+        <div id="lindo">
+            <h3 id="nome-cenario">Carregando...</h3>
+            <p id="bonus-texto">Bônus: Calculando... <?php </p>
+            <a href="#" id="link-cenario">Ver detalhes do habitat</a>
+        </div>
+    </div>
 
-<script>
+    <script>
+        let ns = Math.floor(Math.random() * 6) + 1;
+        
+        let nomeCenario = "";
+        let imagemUrl = "";
+        let bonusHabitat = 0;
 
+        switch (ns) {
+            case 1:
+                nomeCenario = "bosque";
+                imagemUrl = "../bosque.png";
+                bonusHabitat = 15; // Exemplo: +15 de agilidade
+                break;
+            case 2:
+                nomeCenario = "desfiladeiro";
+                imagemUrl = "../desfiladeiro.png";
+                bonusHabitat = 15;
+                break;
+            case 3:
+                nomeCenario = "pantano";
+                imagemUrl = "../pantano.png";
+                bonusHabitat = 15;
+                break;
+            case 4:
+                nomeCenario = "estradapedra";
+                imagemUrl = "../estradapedra";
+                bonusHabitat = 15;
+                break;
+            case 5:
+                nomeCenario = "praianoturna";
+                imagemUrl = "../praianotura";
+                bonusHabitat = 15;
+                break;
+            default:
+                nomeCenario = "arena Padrão";
+                imagemUrl = "padrao.png";
+                bonusHabitat = 0;
+                break;
+        }
 
-</script>
+        // 3. Aplica as mudanças no HTML (DOM)
+        // Altera a imagem de fundo da div #loglindo
+        document.getElementById("loglindo").style.backgroundImage = `url('${imagemUrl}')`;
+        
+        document.getElementById("nome-cenario").innerText = `Cenário: ${nomeCenario} (ID: ${ns})`;
+        document.getElementById("bonus-texto").innerText = `Bônus de Habitat: +${bonusHabitat}`;
+        
+        document.getElementById("link-cenario").href = imagemUrl;
+    </script>
 </body>
 </html>
