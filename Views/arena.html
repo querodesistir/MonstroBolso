@@ -76,10 +76,7 @@
                 bonusHabitat = 0;
                 break;
         }
-
-        // 3. Aplica as mudanças no HTML (DOM)
-        // Altera a imagem de fundo da div #loglindo
-        document.getElementById("loglindo").style.backgroundImage = `url('${imagemUrl}')`;
+        document.getElementById("lindo").style.backgroundImage = `url('${imagemUrl}')`;
         
         document.getElementById("nome-cenario").innerText = `Cenário: ${nomeCenario} (ID: ${ns})`;
         document.getElementById("bonus-texto").innerText = `Bônus de Habitat: +${bonusHabitat}`;
