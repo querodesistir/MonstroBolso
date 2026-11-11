@@ -11,7 +11,7 @@ if ($mail === '' || $senha === '') {
     header("Location: ../Views/login.html?erro=campos");
     exit;
 }
- 
+ // qaundo eu fizer o cadastro tiro o new usuario?
 $usuario = new Usuario($mail, $senha);
 
 if ($usuario->Login()) {

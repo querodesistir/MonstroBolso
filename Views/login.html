@@ -124,11 +124,6 @@ body {
 }
 
 
-.btn-login:active {
-    transform: translateY(1px);
-}
-
-
 .link-cadastro {
     display: block;
     text-align: center;
@@ -157,7 +152,7 @@ body {
         const erro = parametros.get('erro');
 
         if (erro === 'campos') {
-            alert('Login interrompido: preencha o e-mail e a senha.');
+            alert('preencha o e-mail e a senha ou faça o seu cadastro');
         } else if (erro === 'credenciais') {
             alert('Login falhou: e-mail ou senha incorretos. Já fez seu cadastro?');
         }
@@ -167,7 +162,7 @@ body {
         <img src="../imagens/logo.png" alt="MonstroBolso Logo" class="game-logo">
 
 
-        <form action="login.php" method="post" enctype="multipart/form-data" class="game-card">
+        <form action="../Controllers/login.php" method="post" enctype="multipart/form-data" class="game-card">
             <div class="input-group">
                 <input type="email" id="mail" name="mail" placeholder="Email" required>
             </div>
@@ -181,7 +176,7 @@ body {
                     <input type="checkbox" name="remember"> Lembrar Senha
                 </label>
             </div>
-            <button type="submit" class="btn-login">Entrar no Jogo</button>
+            <button type="submit">Entrar no Jogo</button>
             <a href="cadastro.html" class="link-cadastro">Criar nova conta</a>
         </form>
     </div>

@@ -44,7 +44,7 @@
     $con = new conexao();
     $pdo = $con->pdo;
 
-    $sql = "SELECT idsu, mail, senha, apelido, nivel, dindin FROM usuario WHERE mail = :mail";
+    $sql = "SELECT idsu, mail, senha, apelido, nivel, dindin FROM usuario WHERE idsu = :idsu";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':idsu' => $this->idsu]);
@@ -52,15 +52,9 @@
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$usuario || !password_verify($this->senha, $usuario['senha'])) {
-    header("location: login.php ");
-  exit;
+      return false;
     }else{
-//Se ACHAR O USUÁRIO:Grava os dados na Sessão do PHP
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-            $_SESSION['usuario_id'] = $usuario['idsu'];
-            $_SESSION['usuario_apelido'] = $usuario['apelido'];
+
             
     $this->idsu = $usuario['idsu'];
     $this->apelido = $usuario['apelido'];

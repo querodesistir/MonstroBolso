@@ -1,7 +1,7 @@
 USE pou;
 
 CREATE TABLE IF NOT EXISTS usuario (
-	idsu int PRIMARY KEY not null,
+	idsu int PRIMARY KEY auto_increment,
     mail VARCHAR(100) UNIQUE NOT NULL,
     senha VARCHAR(12) NOT NULL,
     apelido varchar(30) not null,
@@ -15,7 +15,7 @@ create table IF NOT EXISTS tipo(
 );
 
 create table IF NOT EXISTS monstro (
-	id int not null primary key,
+	id int primary key auto_increment,
 	nome varchar(30) not null UNIQUE,
     camimage varchar(255) not null,
 	dano int not null,
