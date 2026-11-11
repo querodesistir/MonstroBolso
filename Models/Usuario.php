@@ -55,7 +55,7 @@
     header("location: login.php ");
   exit;
     }else{
-// SE ACHAR O USUÁRIO: Grava os dados na Sessão do PHP
+//Se ACHAR O USUÁRIO:Grava os dados na Sessão do PHP
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }

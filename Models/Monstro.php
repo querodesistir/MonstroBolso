@@ -2,6 +2,7 @@
  class Monstro{
     private $id;
     private $nome;
+    private $camimage;
     private $dano;
     private $hp;
     private $ahp; //hp atual
@@ -10,8 +11,9 @@
     private $danoEspecial;
     private $nodeck;
 
-     function __construct($id, $nome, $dano,$hp = 100, $ahp, $def, $prio, $danoEspecial, $nodeck) {
+     function __construct($id,$camimage ,$nome, $dano,$hp = 100, $ahp, $def, $prio, $danoEspecial, $nodeck) {
         $this->nome = $nome;
+        $his->camimage = $camimage;
         $this->dano = $dano;
         $this->hp = $hp;
         $this->ahp = $ahp;
@@ -37,13 +39,24 @@ function ListarMonstroPmontarDeck() {
     $con = new conexao();
     $pdo = $con->pdo;
 
-    $sql = "SELECT nome,dano,hp, ahp, def, denoEspecial FROM Monstro where nodeck = false
+    $sql = "SELECT nome,camimage,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = false
     order by dano desc";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
 
-    return $stmt->fetchALL(PDO::FETCH_ASSOC);
+    return $stmt->fetchAll()(PDO::FETCH_ASSOC);
+}
+function MonstrosnoDeck(){
+    $con = new conexao();
+    $pdo = $con->pdo;
+
+    $sql = "SELECT nome,camimage,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = true";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+
+    return $stmt->fetchAll()(PDO::FETCH_ASSOC);
 }
 function AddaoDeck($id){
     $con = new conexao();
@@ -93,6 +106,9 @@ function setAhp($ahp){
 function setDef($def){
     $this->def = $def;
 }
+function setImage(){
+    $this->camimage = $camimage;
+}
 
 function getId(){
   return $this->id;
@@ -104,13 +120,16 @@ function getDano(){
   return $this->dano;
 }
 function getHp(){
-  return $this->Hp;
+  return $this->hp;
 }
 function getAhp(){
   return $this->ahp;
 }
 function getDef(){
   return $this->def;
+}
+function getImage(){
+    return $this->camimage;
 }
  }
 ?>

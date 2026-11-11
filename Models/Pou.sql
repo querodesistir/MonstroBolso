@@ -17,6 +17,7 @@ create table IF NOT EXISTS tipo(
 create table IF NOT EXISTS monstro (
 	id int not null primary key,
 	nome varchar(30) not null UNIQUE,
+    camimage varchar(255) not null,
 	dano int not null,
 	hp int default 100,
 	ahp int,
@@ -24,19 +25,22 @@ create table IF NOT EXISTS monstro (
 	prio int,
     danoEspecial int,
 	tipid int not null,
-	nodeck boolean default false,
+	nodeck boolean,
 foreign key (tipid) references tipo(tipid)
 );
 
 create table IF NOT EXISTS deckbattle(
-ideck int PRIMARY KEY,
-idm1 int not null,
-idm2 int not null,
-idm3 int not null,
-titulo varchar(12) default 'FolhaX',
-foreign key (idm1) references monstro (id),
-foreign key (idm2) references monstro (id),
-foreign key (idm3) references monstro (id)
+    ideck INT PRIMARY KEY,
+    idsu INT NOT NULL,
+    idm1 INT,
+    idm2 INT,
+    idm3 INT,
+    titulo VARCHAR(12) DEFAULT 'FolhaX',
+
+    FOREIGN KEY (idsu) REFERENCES usuario(idsu),
+    FOREIGN KEY (idm1) REFERENCES monstro(id),
+    FOREIGN KEY (idm2) REFERENCES monstro(id),
+    FOREIGN KEY (idm3) REFERENCES monstro(id)
 );
 
 create table IF NOT EXISTS itens(
@@ -49,10 +53,12 @@ descri varchar(200)
 
 CREATE TABLE IF NOT EXISTS logbatalhas(
 idlog int primary key,
+ideckMau,
 ideck int,
 dano INT,
 cura INT,
-foreign KEY (ideck) references deckbattle(ideck)
+foreign KEY (ideck) references deckbattle(ideck),
+foreign key (ideckMau) references deckbattle(ideck)
 );
 
 INSERT ignore INTO TIPO(tipid, elemento)
