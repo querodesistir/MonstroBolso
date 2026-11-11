@@ -6,20 +6,47 @@
     <title>Meu deck</title>
     <style>
         .tresescolhidos {
-         border-radius: 5%;
-         border: 3px solid rgb(139, 74, 0);
+            border-radius: 5%;
+            border: 3px solid rgb(139, 74, 0);
+        }
+
+        .selecionar {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: #2883b8;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+        .selecionar:hover {
+            background-color: #00101d;
         }
     </style>
 </head>
 <body>
-    <div class="tresescolhidos">
-        
-    </div>
-    <table class="monstro-list">
-        <td>
-            <th></th>
-            <tr></tr>
-        </td>
+<!--Tá muito errado. Falta imagem e os monstros-->
+
+   <table class="monstro-lista">
+        <tr>
+            <th>Nome</th>
+            <th>Dano</th>
+            <th>HP Máximo</th>
+            <th>Defesa</th>
+            <th>Ação</th>
+        </tr>
+            <?php foreach ($listaMonstros as $monstro): ?>
+                <tr>
+                    <td><?= htmlspecialchars($monstro['nome']) ?></td>
+                    <td><?= $monstro['dano'] ?></td>
+                    <td><?= $monstro['hp'] ?></td>
+                    <td><?= $monstro['def'] ?></td>
+                    <td>
+<a class="selecionar" href="index.php?acao=addaoDeck&id=<?= $monstro['id'] ?>"> Selecionar </a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
     </table>
 </body>
 </html>
