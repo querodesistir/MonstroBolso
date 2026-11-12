@@ -66,7 +66,7 @@ VALUES(3, "aquatico");
 INSERT ignore INTO TIPO(tipid, elemento)
 VALUES(1, "voador");
 
-INSERT ignore INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid) 
-VALUES(4, "Fogi", 5, 100, 100, 1, 20, 3, 3);
-INSERT IGNORE INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid)
-VALUES(2, "Quero-quero", 10, 100, 100, 1, 30, 1, 1);
+INSERT ignore INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid, nodeck) 
+VALUES(4, "Fogi", 5, 100, 100, 1, 20, 3, 3, true);
+INSERT IGNORE INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid, nodeck)
+VALUES(2, "Quero-quero", 10, 100, 100, 1, 30, 1, 1, false);

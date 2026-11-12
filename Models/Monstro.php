@@ -11,8 +11,7 @@ class Monstro
     private $prio; //prioridade
     private $danoEspecial;
     private $nodeck;
-
-    function __construct($camimage, $nome, $dano, $hp = 100, $ahp, $def, $prio, $danoEspecial, $nodeck)
+    function __construct($camimage, $nome, $dano, $hp, $ahp, $def, $prio, $danoEspecial, $nodeck)
     {
         $this->nome = $nome;
         $this->camimage = $camimage;
@@ -49,7 +48,7 @@ class Monstro
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
 
-        return $stmt->fetchAll()(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     function MonstrosnoDeck()
     {
