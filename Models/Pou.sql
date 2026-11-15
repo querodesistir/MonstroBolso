@@ -17,7 +17,7 @@ create table IF NOT EXISTS tipo(
 create table IF NOT EXISTS monstro (
 	id int primary key auto_increment,
 	nome varchar(30) not null UNIQUE,
-    camimage varchar(255) not null,
+    imagem varchar(255) not null,
 	dano int not null,
 	hp int default 100,
 	ahp int,
@@ -66,7 +66,7 @@ VALUES(3, "aquatico");
 INSERT ignore INTO TIPO(tipid, elemento)
 VALUES(1, "voador");
 
-INSERT ignore INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid, nodeck) 
-VALUES(4, "Fogi", 5, 100, 100, 1, 20, 3, 3, true);
-INSERT IGNORE INTO monstro(id, nome, dano, hp, ahp, def, prio, danoEspecial, tipid, nodeck)
-VALUES(2, "Quero-quero", 10, 100, 100, 1, 30, 1, 1, false);
+INSERT ignore INTO monstro(id, nome, imagem, dano, hp, ahp, def, prio, danoEspecial, tipid, nodeck) 
+VALUES(4, "Fogi", "fogi.png", 5, 100, 100, 1, 20, 3, 3, true);
+INSERT IGNORE INTO monstro(id, nome, imagem, dano, hp, ahp, def, prio, danoEspecial, tipid, nodeck)
+VALUES(2, "Quero-quero", "quero.png", 10, 100, 100, 1, 30, 1, 1, false);

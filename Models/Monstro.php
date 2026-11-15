@@ -3,7 +3,7 @@ class Monstro
 {
     private $id;
     private $nome;
-    private $camimage;
+    private $imagem;
     private $dano;
     private $hp;
     private $ahp; //hp atual
@@ -14,7 +14,7 @@ class Monstro
     function __construct($camimage, $nome, $dano, $hp, $ahp, $def, $prio, $danoEspecial, $nodeck)
     {
         $this->nome = $nome;
-        $this->camimage = $camimage;
+        $this->imagem = $imagem;
         $this->dano = $dano;
         $this->hp = $hp;
         $this->ahp = $ahp;
@@ -42,7 +42,7 @@ class Monstro
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT nome,camimage,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = false
+        $sql = "SELECT nome,magem,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = false
     order by dano desc";
 
         $stmt = $pdo->prepare($sql);
@@ -55,7 +55,7 @@ class Monstro
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT nome,camimage,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = true";
+        $sql = "SELECT nome,imagem,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = true";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
@@ -122,9 +122,9 @@ class Monstro
     {
         $this->def = $def;
     }
-    function setImage($camimage)
+    function setImage($imagem)
     {
-        $this->camimage = $camimage;
+        $this->imagem = $imagem;
     }
 
     function getId()
@@ -153,7 +153,7 @@ class Monstro
     }
     function getImage()
     {
-        return $this->camimage;
+        return $this->imagem;
     }
 }
 ?>
