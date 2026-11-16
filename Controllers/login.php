@@ -7,13 +7,12 @@ require_once "../autoload.php";
 $mail = trim($_POST['mail'] ?? '');
 $senha = $_POST['senha'] ?? '';
 
+$usuario = new Usuario($mail, $senha);
+
 if ($mail === '' || $senha === '') {
     header("Location: ../Views/login.html?erro=campos");
     exit;
 }
- // qaundo eu fizer o cadastro tiro o new usuario?
-$usuario = new Usuario($mail, $senha);
-
 if ($usuario->Login()) {
     $_SESSION['logado'] = true;
     $_SESSION['idsu'] = $usuario->getIdsu();

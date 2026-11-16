@@ -1,0 +1,744 @@
+
+<!DOCTYPE html> <!-- o que era para isso fazer, em Gus?Como funciona-->
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Batalha — MonstroBolso</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Trebuchet MS', Verdana, sans-serif;
+  background: #1c2333; color: #22262e;
+  min-height: 100vh; overflow-x: hidden;
+}
+.escondida { display: none !important; }
+button { font-family: inherit; cursor: pointer; }
+
+/* Tela inicial */
+#tela-escolha {
+  min-height: 100vh; padding: 24px 16px 40px;
+  background: radial-gradient(circle at 50% 0%, #2d3a5c, #1c2333 65%);
+  text-align: center;
+}
+#tela-escolha h1 {
+  color: #ffd75e; font-size: 40px; letter-spacing: 2px; text-shadow: 3px 3px 0 #0e1424;
+}
+#sub-escolha { color: #cfd8ee; margin: 8px 0 14px; font-size: 17px; }
+
+/* Faixa com o HP do seu monstro */
+#faixa-parceiro {
+  max-width: 680px; margin: 0 auto 16px; padding: 10px 16px;
+  background: rgba(0,0,0,.4); border: 2px solid rgba(255,255,255,.25);
+  border-radius: 12px; color: #fff; font-weight: bold; font-size: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+#faixa-parceiro .barra-externa {
+  flex: 1; margin-top: 0;
+  background: rgba(255,255,255,.25); border-color: rgba(0,0,0,.5);
+}
+#fp-hp { white-space: nowrap; }
+
+/* Cartoes dos 3 iniciais */
+#grade-iniciais {
+  display: grid; gap: 16px; max-width: 680px; margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.cartao {
+  background: #f8f0d8; border: 3px solid #2a2a2a; border-radius: 14px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.4); padding: 16px 10px 14px;
+  transition: transform .15s;
+}
+.cartao:hover { transform: translateY(-4px) scale(1.03); }
+.cartao .emo { height: 96px; display: flex; align-items: center; justify-content: center; }
+.cartao .emo .sprite-img { width: 92px; height: 92px; object-fit: contain; }
+.cartao .emo .sprite-emo { font-size: 58px; line-height: 1; }
+.cartao .nm { font-weight: bold; margin-top: 8px; font-size: 17px; }
+
+/* Badge do tipo */
+.badge {
+  display: inline-block; margin-top: 6px; padding: 2px 10px;
+  border-radius: 30px; color: #fff; font-size: 12px; font-weight: bold;
+}
+.st { font-size: 12px; color: #666; margin-top: 6px; }
+.frase { font-size: 12px; color: #8a7f5f; font-style: italic; margin-top: 4px; }
+#dica-escolha { color: #8fa0c7; margin-top: 18px; font-size: 14px; }
+
+/* Botao do Centro de Cura */
+#btn-centro {
+  margin-top: 14px; background: #4cd964; color: #fff;
+  border: 3px solid #2a2a2a; border-radius: 10px;
+  padding: 10px 20px; font-weight: bold; font-size: 15px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.3);
+  box-shadow: 3px 3px 0 rgba(0,0,0,.4);
+}
+#btn-centro:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(0,0,0,.4); }
+
+/* Arena de batalha */
+#tela-batalha { height: 100vh; display: flex; flex-direction: column; }
+#arena {
+  position: relative; flex: 1; min-height: 0;
+  background: linear-gradient(#3c5077, #7f95bd); overflow: hidden;
+  border-bottom: 4px solid #2a2a2a;
+}
+/* Caixas de status */
+.caixa-status {
+  position: absolute; width: 46%; max-width: 330px;
+  background: #f8f0d8; border: 3px solid #2a2a2a; border-radius: 12px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.35); padding: 10px 14px;
+  z-index: 4;
+}
+#status-inimigo { top: 18px; left: 18px; }
+#status-jogador { bottom: 18px; right: 18px; }
+.nome-nv { display: flex; justify-content: space-between; font-weight: bold; }
+.nome-nv span:last-child { color: #555; }
+
+/* Barras de vida */
+.barra-externa {
+  height: 13px; background: #565656; border: 2px solid #2a2a2a;
+  border-radius: 30px; margin-top: 7px; overflow: hidden;
+}
+.barra-vida {
+  height: 100%; width: 100%; background: #4cd964;
+  transition: width .5s ease; border-radius: 30px;
+}
+.barra-vida.amarela { background: #f5c231; }
+.barra-vida.vermelha { background: #e2442c; }
+.hp-numeros { text-align: right; font-size: 12px; color: #444; margin-top: 4px; }
+
+
+/* Monstros (imagem em imagens/ ou emoji) */
+.monstro {
+  position: absolute; width: 150px; height: 150px; z-index: 3;
+}
+.sprite-img { width: 100%; height: 100%; object-fit: contain; }
+.sprite-img, .sprite-emo { filter: drop-shadow(3px 6px 4px rgba(0,0,0,.35)); }
+.sprite-emo { font-size: 90px; line-height: 1; }
+.corpo {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  animation: flutuar 2.8s ease-in-out infinite;
+}
+.sombra-chao {
+  position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+  width: 74%; height: 16px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,.4) 0%, transparent 68%);
+}
+#sprite-inimigo { top: 13%; right: 9%; }
+#sprite-jogador { bottom: 9%; left: 9%; }
+
+
+/* Animacoes */
+@keyframes flutuar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes entrarEsq { from { transform: translateX(-90px); opacity: 0; } }
+@keyframes entrarDir { from { transform: translateX(90px); opacity: 0; } }
+.entrar-esq { animation: entrarEsq .6s ease; }
+.entrar-dir { animation: entrarDir .6s ease; }
+@keyframes avancaJog { 0%,100% { transform: translate(0,0); } 40% { transform: translate(90px,-60px) scale(1.08); } }
+@keyframes avancaIni { 0%,100% { transform: translate(0,0); } 40% { transform: translate(-90px,60px) scale(1.08); } }
+.atacando-j { animation: avancaJog .55s ease; }
+.atacando-i { animation: avancaIni .55s ease; }
+@keyframes tremer { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-4px); } }
+@keyframes piscar { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+.sofrendo { animation: tremer .5s, piscar .5s; }
+@keyframes sobeNum { 0% { opacity: 0; transform: translateY(0) scale(.7); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-70px) scale(1.2); } }
+.num-flutuante {
+  position: absolute; font-size: 30px; font-weight: 900; color: #fff;
+  text-shadow: 2px 2px 0 #000; pointer-events: none;
+  animation: sobeNum .9s ease forwards; z-index: 5;
+}
+@keyframes fadeIn { from { opacity: 0; } }
+.log-anim { animation: fadeIn .3s ease; }
+
+
+/* Log e painel de baixo */
+#painel {
+  height: 180px; background: #2d3a5c;
+  display: flex; gap: 10px; padding: 10px 14px;
+}
+#barra-log { flex: 1.2; display: flex; flex-direction: column; gap: 6px; }
+#log {
+  flex: 1; background: #fffef2; border: 3px solid #2a2a2a; border-radius: 10px;
+  padding: 10px 14px; font-weight: bold; font-size: 16px;
+  display: flex; align-items: center;
+}
+#btn-fugir {
+  align-self: flex-end; background: #c9553d; color: #fff; font-weight: bold;
+  border: 3px solid #2a2a2a; border-radius: 8px; padding: 4px 14px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.4);
+}
+
+
+/* Botoes de comando (2x2) */
+#comandos {
+  flex: 1; display: grid; gap: 8px;
+  grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+}
+.btn-cmd {
+  background: #fffef2; border: 3px solid #2a2a2a; border-radius: 10px;
+  font-weight: bold; font-size: 15px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,.4); padding: 4px 8px;
+  display: flex; align-items: center; gap: 7px; justify-content: center;
+}
+.btn-cmd:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(0,0,0,.4); }
+.btn-cmd:disabled { opacity: .45; }
+.btn-cmd .badge { margin: 0; padding: 1px 8px; font-size: 11px; }
+#comandos.bloqueado { pointer-events: none; opacity: .55; }
+
+
+/* Fim de batalha */
+#resultado {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,14,26,.72);
+  display: flex; align-items: center; justify-content: center; z-index: 10;
+}
+#cartao-resultado {
+  background: #f8f0d8; border: 4px solid #2a2a2a; border-radius: 16px;
+  box-shadow: 6px 6px 0 rgba(0,0,0,.5); padding: 28px 34px;
+  max-width: 420px; width: 88%; text-align: center;
+  animation: fadeIn .4s ease;
+}
+#titulo-resultado { font-size: 30px; letter-spacing: 1px; }
+#texto-resultado { margin: 10px 0; }
+#placar-resultado { font-weight: bold; color: #555; margin-bottom: 16px; }
+#cartao-resultado button {
+  background: #ffd75e; border: 3px solid #2a2a2a; border-radius: 10px;
+  padding: 9px 16px; font-weight: bold; margin: 4px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,.4);
+}
+</style>
+</head>
+<body>
+<div id="tela-escolha">
+  <h1>MonstroBolso</h1>
+  <p id="sub-escolha">Escolha 1 dos 3 parceiros pra encarar monstros aleatórios!</p>
+  <div id="faixa-parceiro" class="escondida">
+    <span id="fp-nome"></span>
+    <div class="barra-externa"><div class="barra-vida" id="fp-barra"></div></div>
+    <span id="fp-hp"></span>
+  </div>
+  <div id="grade-iniciais"></div>
+  <button id="btn-centro" class="escondida">🏥 Centro de Cura — HP cheio de graça</button>
+  <p id="dica-escolha">Cada tipo é forte contra uns e fraco contra outros. Boa sorte!</p>
+</div>
+
+
+<div id="tela-batalha" class="escondida">
+  <div id="arena">
+    <div class="caixa-status" id="status-inimigo"></div>
+    <div class="monstro" id="sprite-inimigo"></div>
+    <div class="monstro" id="sprite-jogador"></div>
+    <div class="caixa-status" id="status-jogador"></div>
+  </div>
+  <div id="painel">
+    <div id="barra-log">
+      <div id="log"></div>
+      <button id="btn-fugir">Fugir da batalha</button>
+    </div>
+    <div id="comandos">
+      <button class="btn-cmd" id="cmd-0"></button>
+      <button class="btn-cmd" id="cmd-1"></button>
+      <button class="btn-cmd" id="cmd-def">🛡️ Defender</button>
+      <button class="btn-cmd" id="cmd-poc"></button>
+    </div>
+  </div>
+</div>
+
+
+<div id="resultado" class="escondida">
+  <div id="cartao-resultado">
+    <h2 id="titulo-resultado"></h2>
+    <p id="texto-resultado"></p>
+    <p id="placar-resultado"></p>
+    <button id="btn-de-novo">⚔️ Próximo desafio</button>
+    <button id="btn-trocar">🏠 Trocar de monstro</button>
+  </div>
+</div>
+
+
+<script>
+let arena = document.getElementById('arena');
+let log = document.getElementById('log');
+let comandos = document.getElementById('comandos');
+
+
+/* monstros: img = nome do arquivo dentro da pasta imagens */
+let monstros = [
+  { nome: 'Flamigato', img: 'flamigato',  tipo: 'fogo',     emoji: '🦊', hp: 78, atk: 16, def:  9, inicial: true, frase: 'Aquece tudo que encosta', golpe: 'Garra Flamejante', poder: 21 },
+  { nome: 'Aquatopo',  img: 'aquatopo',   tipo: 'agua',     emoji: '🐸', hp: 85, atk: 13, def: 12, inicial: true, frase: 'Calmo, mas nunca desiste', golpe: 'Jato de Lago',     poder: 19 },
+  { nome: 'Folhaco',   img: 'folhaco',    tipo: 'planta',   emoji: '🌱', hp: 82, atk: 14, def: 11, inicial: true, frase: 'Cresce mais que todo mundo', golpe: 'Chicote Trevo',    poder: 18 },
+  { nome: 'Vulcabra',  img: 'vulcabra',   tipo: 'fogo',     emoji: '🦇', hp: 74, atk: 17, def:  8, golpe: 'Asas de Brasa',    poder: 22 },
+  { nome: 'Mareman',   img: 'mareman',    tipo: 'agua',     emoji: '🐬', hp: 80, atk: 15, def: 10, golpe: 'Onda Marina',      poder: 20 },
+  { nome: 'Cactopun',  img: 'cactopun',   tipo: 'planta',   emoji: '🌵', hp: 76, atk: 15, def: 12, golpe: 'Espinho Buena',    poder: 20 },
+  { nome: 'Zapelé',    img: 'zapele',     tipo: 'eletrico', emoji: '🐿️', hp: 76, atk: 16, def:  9, golpe: 'Rabo de Trovão',   poder: 21 },
+  { nome: 'Voltaruga', img: 'voltaruga',  tipo: 'eletrico', emoji: '🐢', hp: 88, atk: 12, def: 13, golpe: 'Casco Chocante',   poder: 18 },
+  { nome: 'Rochambo',  img: 'rochambo',   tipo: 'pedra',    emoji: '🦍', hp: 84, atk: 15, def: 12, golpe: 'Punho Rochoso',    poder: 20 },
+  { nome: 'Granito',   img: 'granito',    tipo: 'pedra',    emoji: '🗿', hp: 92, atk: 11, def: 15, golpe: 'Avalanche',        poder: 17 },
+  { nome: 'Cristalino',img: 'cristalino', tipo: 'gelo',     emoji: '🐧', hp: 80, atk: 14, def: 11, golpe: 'Sopro Polar',      poder: 19 },
+  { nome: 'Nevasca',   img: 'nevasca',    tipo: 'gelo',     emoji: '❄️', hp: 78, atk: 15, def: 10, golpe: 'Tempestade Branca',poder: 21 },
+  { nome: 'Umbrino',   img: 'umbrino',    tipo: 'sombra',   emoji: '👻', hp: 74, atk: 17, def:  8, golpe: 'Toque Espectral',  poder: 21 },
+  { nome: 'Noturnix',  img: 'noturnix',   tipo: 'sombra',   emoji: '🦉', hp: 76, atk: 16, def:  9, golpe: 'Olhar da Noite',   poder: 20 },
+  { nome: 'Draguino',  img: 'draguino',   tipo: 'dragao',   emoji: '🐉', hp: 86, atk: 16, def: 11, golpe: 'Fúria Ancestral',  poder: 22 },
+];
+
+
+/* quem leva mais dano (x1.5) e quem leva menos (x0.6) */
+let eficaz = {
+  fogo: ['planta', 'gelo'], agua: ['fogo', 'pedra'], planta: ['agua', 'pedra'],
+  eletrico: ['agua', 'gelo'], pedra: ['fogo', 'eletrico'], gelo: ['planta', 'dragao'],
+  sombra: ['dragao', 'eletrico'], dragao: ['dragao', 'pedra'], neutro: []
+};
+let fraco = {
+  fogo: ['agua', 'pedra'], agua: ['planta', 'eletrico'], planta: ['fogo', 'gelo'],
+  eletrico: ['pedra', 'sombra'], pedra: ['agua', 'planta', 'dragao'], gelo: ['fogo', 'eletrico'],
+  sombra: ['sombra', 'dragao'], dragao: ['gelo', 'sombra'], neutro: []
+};
+let corTipo = {
+  fogo: '#e2582c', agua: '#2c7de2', planta: '#2ca24a', eletrico: '#c99a10',
+  pedra: '#8a6d4b', gelo: '#59b7d4', sombra: '#5b4b8a', dragao: '#6f35c9', neutro: '#7a7a7a'
+};
+let nomeTipo = {
+  fogo: 'Fogo', agua: 'Água', planta: 'Planta', eletrico: 'Elétrico', pedra: 'Pedra',
+  gelo: 'Gelo', sombra: 'Sombra', dragao: 'Dragão', neutro: 'Normal'
+};
+let fundoImg = {
+  fogo: 'vulcao.jpg', agua: 'praia.jpg', planta: 'floresta.jpg', pedra: 'caverna.jpg',
+  eletrico: 'praia.jpg', gelo: 'geleira.jpg', sombra: 'caverna.jpg', dragao: 'vulcao.jpg'
+};
+let fundoGrad = {
+  fogo: 'linear-gradient(#5c1f0e, #b33a1a)', agua: 'linear-gradient(#1d4e7a, #2c7de2)',
+  planta: 'linear-gradient(#14401f, #2ca24a)', pedra: 'linear-gradient(#3a2f22, #8a6d4b)',
+  eletrico: 'linear-gradient(#4d3f05, #c99a10)', gelo: 'linear-gradient(#1d4a5c, #59b7d4)',
+  sombra: 'linear-gradient(#1a1430, #5b4b8a)', dragao: 'linear-gradient(#2a0f4d, #6f35c9)'
+};
+
+let jogador = null;
+let inimigo = null;
+let minhaVez = false;
+let vitoriasSeguidas = 0;
+let recorde = 0;
+try { recorde = Number(localStorage.getItem('mb_recorde')) || 0; } catch (e) {}
+
+
+function criarSprite(m) {
+  let img = document.createElement('img');
+  img.className = 'sprite-img';
+  img.alt = m.nome;
+  img.src = 'imagens/' + m.img + '.png';
+  // se a imagem nao existir tenta .jpg, e por ultimo mostra o emoji
+  img.onerror = function () {
+    if (img.src.indexOf('.png') !== -1) {
+      img.src = 'imagens/' + m.img + '.jpg';
+    } else {
+      let emo = document.createElement('span');
+      emo.className = 'sprite-emo';
+      emo.textContent = m.emoji;
+      img.replaceWith(emo);
+    }
+  };
+  return img;
+}
+
+
+function montarSprite(lugar, lado) {
+  lugar.innerHTML = '';
+  let sombra = document.createElement('div');
+  sombra.className = 'sombra-chao';
+  let corpo = document.createElement('div');
+  corpo.className = 'corpo';
+  corpo.appendChild(criarSprite(lado));
+  lugar.appendChild(sombra);
+  lugar.appendChild(corpo);
+}
+
+
+function criarLado(m, nivel) {
+  let esc = 1 + 0.05 * (nivel - 5);
+  let lado = {
+    nome: m.nome, emoji: m.emoji, tipo: m.tipo, nivel: nivel,
+    hpMax: Math.round(m.hp * esc), hp: Math.round(m.hp * esc),
+    atk: m.atk + (nivel - 5), def: m.def + Math.floor((nivel - 5) / 2),
+    golpes: [
+      { n: m.golpe, p: m.poder, t: m.tipo },
+      { n: 'Investida', p: 14, t: 'neutro' }
+    ],
+    pocao: 2, defendendo: false
+  };
+  return lado;
+}
+
+
+/* fundo da tela inicial (se existir a imagem) */
+function poeFundoEscolha() {
+  let tela = document.getElementById('tela-escolha');
+  let tentativas = ['imagens/fundo-escolha.jpg', 'imagens/fundo-escolha.png'];
+  for (let i = 0; i < tentativas.length; i++) {
+    let img = new Image();
+    img.onload = function () {
+      tela.style.backgroundImage = 'linear-gradient(rgba(10,14,26,.55), rgba(10,14,26,.55)), url("' + tentativas[i] + '")';
+      tela.style.backgroundSize = 'cover';
+      tela.style.backgroundPosition = 'center';
+    };
+    img.src = tentativas[i];
+  }
+}
+
+
+function montarEscolha() {
+  let grade = document.getElementById('grade-iniciais');
+  for (let i = 0; i < monstros.length; i++) {
+    if (!monstros[i].inicial) continue;
+    let cartao = document.createElement('button');
+    cartao.className = 'cartao';
+    cartao.innerHTML =
+      '<div class="emo"></div>' +
+      '<div class="nm">' + monstros[i].nome + '</div>' +
+      '<span class="badge" style="background:' + corTipo[monstros[i].tipo] + '">' + nomeTipo[monstros[i].tipo] + '</span>' +
+      '<div class="st">❤️ ' + monstros[i].hp + ' · ⚔️ ' + monstros[i].atk + ' · 🛡️ ' + monstros[i].def + '</div>' +
+      '<div class="frase">' + monstros[i].frase + '</div>';
+    cartao.querySelector('.emo').appendChild(criarSprite(monstros[i]));
+    cartao.addEventListener('click', function () { escolherMonstro(i); });
+    grade.appendChild(cartao);
+  }
+}
+
+
+function escolherMonstro(i) {
+  let m = monstros[i];
+  if (jogador === null || jogador.nome !== m.nome) {
+    jogador = criarLado(m, 5);   // parceiro novo comeca do zero
+    vitoriasSeguidas = 0;
+  }
+  proximoDesafio();
+}
+
+
+/* sorteia um selvagem (os iniciais nao entram) */
+function sortearInimigo() {
+  let m = monstros[Math.floor(Math.random() * monstros.length)];
+  while (m.inicial) {
+    m = monstros[Math.floor(Math.random() * monstros.length)];
+  }
+  return m;
+}
+
+
+function proximoDesafio() {
+  let nv = 5 + vitoriasSeguidas;
+  if (nv > 12) nv = 12;
+  inimigo = criarLado(sortearInimigo(), nv);
+  mostrarBatalha();
+}
+
+
+function atualizarFaixa() {
+  if (jogador === null) return;
+  let pct = Math.round(jogador.hp / jogador.hpMax * 100);
+  if (pct < 0) pct = 0;
+  document.getElementById('fp-nome').textContent = jogador.nome + ' · Nv. ' + jogador.nivel;
+  document.getElementById('fp-barra').className = barraClasse(pct);
+  document.getElementById('fp-barra').style.width = pct + '%';
+  document.getElementById('fp-hp').textContent = Math.max(0, jogador.hp) + ' / ' + jogador.hpMax;
+  document.getElementById('faixa-parceiro').classList.remove('escondida');
+  document.getElementById('btn-centro').classList.remove('escondida');
+}
+
+
+function centroDeCura() {
+  if (jogador === null) return;
+  jogador.hp = jogador.hpMax;
+  atualizarFaixa();
+  document.getElementById('dica-escolha').textContent = '✨ ' + jogador.nome + ' saiu do Centro de Cura novo em folha!';
+}
+
+
+function mostrarBatalha() {
+  document.getElementById('tela-escolha').classList.add('escondida');
+  document.getElementById('resultado').classList.add('escondida');
+  document.getElementById('tela-batalha').classList.remove('escondida');
+  montarSprite(document.getElementById('sprite-jogador'), jogador);
+  montarSprite(document.getElementById('sprite-inimigo'), inimigo);
+  document.getElementById('sprite-jogador').classList.add('entrar-esq');
+  document.getElementById('sprite-inimigo').classList.add('entrar-dir');
+  setTimeout(function () {
+    document.getElementById('sprite-jogador').classList.remove('entrar-esq');
+    document.getElementById('sprite-inimigo').classList.remove('entrar-dir');
+  }, 700);
+  document.getElementById('cmd-0').innerHTML = jogador.golpes[0].n +
+    ' <span class="badge" style="background:' + corTipo[jogador.golpes[0].t] + '">' + nomeTipo[jogador.golpes[0].t] + '</span>';
+  document.getElementById('cmd-1').innerHTML = jogador.golpes[1].n +
+    ' <span class="badge" style="background:' + corTipo[jogador.golpes[1].t] + '">' + nomeTipo[jogador.golpes[1].t] + '</span>';
+  jogador.pocao = 2;
+  inimigo.pocao = 1;
+  atualizarPocao();
+  aplicarFundo(inimigo.tipo);
+  atualizarHUD();
+  escreverLog('Um ' + inimigo.nome + ' selvagem apareceu!');
+  minhaVez = false;
+  comandos.classList.add('bloqueado');
+  setTimeout(function () {
+    escreverLog('O que ' + jogador.nome + ' vai fazer?');
+    minhaVez = true;
+    comandos.classList.remove('bloqueado');
+  }, 1400);
+}
+
+
+/* fundo da arena: comeca com cor e troca pela imagem do habitat se carregar */
+function aplicarFundo(tipo) {
+  let arquivo = fundoImg[tipo];
+  arena.style.backgroundImage = fundoGrad[tipo];
+  let tentativas = ['img-habitats/' + arquivo, '../img-habitats/' + arquivo];
+  for (let i = 0; i < tentativas.length; i++) {
+    let img = new Image();
+    img.onload = function () {
+      arena.style.backgroundImage = 'linear-gradient(rgba(0,0,0,.2), rgba(0,0,0,.2)), url("' + tentativas[i] + '")';
+      arena.style.backgroundSize = 'cover';
+      arena.style.backgroundPosition = 'center';
+    };
+    img.src = tentativas[i];
+  }
+}
+
+
+function barraClasse(pct) {
+  if (pct <= 25) return 'barra-vida vermelha';
+  if (pct <= 55) return 'barra-vida amarela';
+  return 'barra-vida';
+}
+
+
+function caixaHTML(l, mostrarNumeros) {
+  let pct = Math.round(l.hp / l.hpMax * 100);
+  if (pct < 0) pct = 0;
+  let html = '<div class="nome-nv"><span>' + l.nome + '</span><span>Nv. ' + l.nivel + '</span></div>';
+  html = html + '<div class="barra-externa"><div class="' + barraClasse(pct) + '" style="width:' + pct + '%"></div></div>';
+  if (mostrarNumeros) {
+    html = html + '<div class="hp-numeros">' + Math.max(0, l.hp) + ' / ' + l.hpMax + '</div>';
+  }
+  return html;
+}
+
+
+function atualizarHUD() {
+  document.getElementById('status-inimigo').innerHTML = caixaHTML(inimigo, false);
+  document.getElementById('status-jogador').innerHTML = caixaHTML(jogador, true);
+}
+
+
+function atualizarPocao() {
+  document.getElementById('cmd-poc').innerHTML = '🧪 Poção (' + jogador.pocao + ')';
+  document.getElementById('cmd-poc').disabled = jogador.pocao <= 0;
+}
+
+
+function escreverLog(txt) {
+  log.textContent = txt;
+  log.classList.remove('log-anim');
+  setTimeout(function () { log.classList.add('log-anim'); }, 10);
+}
+
+function numeroFlutuante(lado, txt, cor) {
+  let sprite = document.getElementById('sprite-jogador');
+  if (lado === 'inimigo') sprite = document.getElementById('sprite-inimigo');
+  let num = document.createElement('span');
+  num.className = 'num-flutuante';
+  num.textContent = txt;
+  num.style.color = cor;
+  num.style.left = (30 + Math.random() * 40) + '%';
+  num.style.top = '20%';
+  sprite.appendChild(num);
+  setTimeout(function () { num.remove(); }, 950);
+}
+
+function animar(lado, classe) {
+  let sprite = document.getElementById('sprite-jogador');
+  if (lado === 'inimigo') sprite = document.getElementById('sprite-inimigo');
+  sprite.classList.remove('atacando-j', 'atacando-i', 'sofrendo');
+  setTimeout(function () { sprite.classList.add(classe); }, 10);
+  setTimeout(function () { sprite.classList.remove(classe); }, 610);
+}
+
+function calcDano(a, d, golpe, defendendo) {
+  let mult = 1;
+  let extra = '';
+  if (eficaz[golpe.t].indexOf(d.tipo) !== -1) {
+    mult = 1.5;
+    extra = ' É super efetivo!';
+  } else if (fraco[golpe.t].indexOf(d.tipo) !== -1) {
+    mult = 0.6;
+    extra = ' Não é muito efetivo...';
+  }
+  if (Math.random() < 0.12) {
+    mult = mult * 1.4;
+    extra = extra + ' Acerto crítico!';
+  }
+  let dano = (a.atk + golpe.p) - d.def;
+  if (defendendo) {
+    mult = mult * 0.4;
+  }
+  dano = dano * mult * (0.9 + Math.random() * 0.2);
+  if (dano < 1) dano = 1;
+  return { dano: Math.round(dano), extra: extra };
+}
+
+
+function aplicarDano(alvo, ladoAlvo, resultado) {
+  alvo.hp = alvo.hp - resultado.dano;
+  alvo.defendendo = false;
+  animar(ladoAlvo, 'sofrendo');
+  numeroFlutuante(ladoAlvo, '-' + resultado.dano, '#ff5d5d');
+  atualizarHUD();
+  return alvo.hp <= 0;
+}
+
+
+function executarGolpe(atacante, alvo, ladoAlvo, golpe) {
+  escreverLog(atacante.nome + ' usou ' + golpe.n + '!');
+  let ladoAtq = 'inimigo';
+  if (atacante === jogador) ladoAtq = 'jogador';
+  if (ladoAtq === 'jogador') {
+    animar('jogador', 'atacando-j');
+  } else {
+    animar('inimigo', 'atacando-i');
+  }
+  setTimeout(function () {
+    let res = calcDano(atacante, alvo, golpe, alvo.defendendo);
+    escreverLog(atacante.nome + ' usou ' + golpe.n + '!' + res.extra);
+    let caiu = aplicarDano(alvo, ladoAlvo, res);
+    if (caiu) {
+      setTimeout(function () { fim(atacante === jogador); }, 1300);
+    }
+  }, 350);
+}
+
+
+function usarPocao(lado) {
+  let quem = inimigo;
+  if (lado === 'jogador') quem = jogador;
+  quem.pocao = quem.pocao - 1;
+  let antes = quem.hp;
+  quem.hp = quem.hp + Math.round(quem.hpMax * 0.35);
+  if (quem.hp > quem.hpMax) quem.hp = quem.hpMax;
+  atualizarHUD();
+  if (lado === 'jogador') atualizarPocao();
+  numeroFlutuante(lado, '+' + (quem.hp - antes), '#5dff8a');
+  escreverLog('Glub! ' + quem.nome + ' recuperou ' + (quem.hp - antes) + ' de HP!');
+}
+
+
+function usarDefesa(lado) {
+  let quem = inimigo;
+  if (lado === 'jogador') quem = jogador;
+  quem.defendendo = true;
+  escreverLog(quem.nome + ' se preparou pra defender! 🛡️');
+}
+
+
+function jogada(tipoAcao, indice) {
+  if (!minhaVez) return;
+  minhaVez = false;
+  comandos.classList.add('bloqueado');
+  if (tipoAcao === 'pocao') {
+    usarPocao('jogador');
+  } else if (tipoAcao === 'defesa') {
+    usarDefesa('jogador');
+  } else {
+    executarGolpe(jogador, inimigo, 'inimigo', jogador.golpes[indice]);
+  }
+  setTimeout(turnoInimigo, 1600);
+}
+
+
+function turnoInimigo() {
+  if (inimigo.hp <= 0 || jogador.hp <= 0) return;   // a batalha ja acabou
+  if (inimigo.pocao > 0 && inimigo.hp <= inimigo.hpMax * 0.3 && Math.random() < 0.55) {
+    usarPocao('inimigo');
+  } else {
+    let golpe;
+    if (Math.random() < 0.7) {
+      golpe = inimigo.golpes[0];   // quase sempre usa o golpe forte
+    } else {
+      golpe = inimigo.golpes[1];
+    }
+    executarGolpe(inimigo, jogador, 'jogador', golpe);
+  }
+  setTimeout(function () {
+    if (jogador.hp <= 0 || inimigo.hp <= 0) return;
+    escreverLog('O que ' + jogador.nome + ' vai fazer?');
+    minhaVez = true;
+    comandos.classList.remove('bloqueado');
+  }, 1600);
+}
+
+
+function fim(venceu) {
+  comandos.classList.add('bloqueado');
+  if (venceu) {
+    vitoriasSeguidas = vitoriasSeguidas + 1;
+    if (vitoriasSeguidas > recorde) {
+      recorde = vitoriasSeguidas;
+      try { localStorage.setItem('mb_recorde', recorde); } catch (e) {}
+    }
+    jogador.nivel = jogador.nivel + 1;
+    jogador.atk = jogador.atk + 1;
+    jogador.def = jogador.def + 1;
+    jogador.hpMax = jogador.hpMax + 5;
+    let antes = jogador.hp;
+    jogador.hp = jogador.hp + Math.round(jogador.hpMax * 0.35);
+    if (jogador.hp > jogador.hpMax) jogador.hp = jogador.hpMax;
+    let cura = jogador.hp - antes;
+    document.getElementById('titulo-resultado').textContent = '🏆 Vitória!';
+    document.getElementById('texto-resultado').textContent = inimigo.nome + ' foi derrotado! ' +
+      jogador.nome + ' subiu pro Nv. ' + jogador.nivel + ' e recuperou ' + cura + ' de HP.';
+  } else {
+    vitoriasSeguidas = 0;
+    jogador.hp = jogador.hpMax;   // o Centro de Cura revive o parceiro
+    document.getElementById('titulo-resultado').textContent = '💀 Derrota...';
+    document.getElementById('texto-resultado').textContent = jogador.nome +
+      ' desmaiou, mas o Centro de Cura deixou ele novo em folha pra próxima!';
+  }
+  document.getElementById('placar-resultado').textContent =
+    'Vitórias seguidas: ' + vitoriasSeguidas + ' · Recorde: ' + recorde;
+  document.getElementById('resultado').classList.remove('escondida');
+}
+
+
+function fugir() {
+  vitoriasSeguidas = 0;
+  voltarPraEscolha();
+}
+
+
+function voltarPraEscolha() {
+  document.getElementById('tela-batalha').classList.add('escondida');
+  document.getElementById('resultado').classList.add('escondida');
+  document.getElementById('tela-escolha').classList.remove('escondida');
+  atualizarFaixa();
+  document.getElementById('dica-escolha').textContent = 'Enfrente monstros aleatórios seguidos pra subir de nível!';
+  inimigo = null;
+}
+
+
+document.getElementById('cmd-0').addEventListener('click', function () { jogada('golpe', 0); });
+document.getElementById('cmd-1').addEventListener('click', function () { jogada('golpe', 1); });
+document.getElementById('cmd-def').addEventListener('click', function () { jogada('defesa'); });
+document.getElementById('cmd-poc').addEventListener('click', function () { jogada('pocao'); });
+document.getElementById('btn-fugir').addEventListener('click', fugir);
+document.getElementById('btn-de-novo').addEventListener('click', proximoDesafio);
+document.getElementById('btn-trocar').addEventListener('click', voltarPraEscolha);
+document.getElementById('btn-centro').addEventListener('click', centroDeCura);
+
+
+montarEscolha();
+poeFundoEscolha();
+
+
+carregarArenaDireto(); 
+
+
+</script>
+
+</body>
+</html>
+
+
+
