@@ -13,7 +13,7 @@ function __construct($idm1 = null, $idm2 = null, $idm3 = null, $titulo) {
         $this->titulo = $titulo;
     }
 
-} //fiz nenhum get,set, listar
+} //fiz nenhum get,set, listar...O listar está em monstro!Tá certo?
 function Addeck($ideck, $idsu, $idmonstro) {
     $con = new conexao();
     $pdo = $con->pdo;
