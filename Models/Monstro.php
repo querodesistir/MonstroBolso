@@ -11,7 +11,7 @@ class Monstro
     private $prio; //prioridade
     private $danoEspecial;
     private $nodeck;
-    function __construct($camimage, $nome, $dano, $hp, $ahp, $def, $prio, $danoEspecial, $nodeck)
+    function __construct($nome,$imagem, $dano, $hp, $ahp, $def, $prio, $danoEspecial, $nodeck)
     {
         $this->nome = $nome;
         $this->imagem = $imagem;

@@ -1,48 +1,95 @@
 <?php
-class Deckbattle{
+class Deck{
 private  $ideck;
 private  $idm1; 
 private $idm2; 
 private  $idm3; 
 private $titulo;
 
-function __construct($idm1, $idm2, $idm3, $titulo) {
+function __construct($idm1 = null, $idm2 = null, $idm3 = null, $titulo) {
         $this->idm1 = $idm1;
         $this->idm2 = $idm2;
         $this->idm3 = $idm3;
         $this->titulo = $titulo;
-    } //fim construct
+    }
 
-} 
- function cadasDeck(){ //apagar anter de enviar
-   $con = new conexao();
-   $pdo = $con->pdo;
-   try {
-     $sql = "INSERT INTO Deck(mail,senha, apelido, nivel) VALUES (:mail,:senha, :apelido, :nivel)";
-  
-     
-    $stmt = $pdo->prepare($sql);
-
-    $dados[':mail'] = $this->mail; 
-    $dados[':senha'] = password_hash($this->senha, PASSWORD_DEFAULT); //$dados[':senha'] = $this->senha; ia aconselhou trocar
-    $dados[':apelido'] = $this->apelido;
-    $dados[':nivel'] = $this->nivel;
-
-    $stmt->execute($dados);
-
-    $this->idsu = $pdo->lastInsertID(); 
-
-} catch (PDOException $e) {
-    echo "Erro: " . $e->getMessage();
-}
-   } //fim do cadasu
-
-function Addeck(){ //ESSA FUNÇÃO É PARA ESTAR ONDE?
+} //fiz nenhum get,set, listar
+function Addeck($ideck, $idsu, $idmonstro) {
     $con = new conexao();
     $pdo = $con->pdo;
+
     try {
-        $sql = "UPDATE DECKBATTLE SET ";
+        $pdo->beginTransaction();
+        $sql = "SELECT idm1, idm2, idm3
+                FROM deckbattle
+                WHERE ideck = :ideck AND idsu = :idsu
+                FOR UPDATE";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':ideck' => $ideck,
+            ':idsu' => $idsu
+        ]);
+
+        $deck = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$deck) {
+            $pdo->rollBack();
+            return false;
+        }
+        //  Verifica se o monstro existe e está disponível
+        $sql = "SELECT nodeck FROM monstro WHERE id = :id FOR UPDATE";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':id' => $idmonstro]);
+
+        $monstro = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$monstro || (int)$monstro['nodeck'] === 1) {
+            $pdo->rollBack();
+
+            return false;
+        }
+        //  Encontrar uma posição vazia
+        $coluna = null;
+
+        foreach (['idm1', 'idm2', 'idm3'] as $campo) {
+
+            if ($deck[$campo] === null) {
+                $coluna = $campo;
+                break;
+            }
+        }
+
+        if ($coluna === null) {
+            $pdo->rollBack();
+            return false;
+        }
+
+        // Add monstro ao deck
+        $sql = "UPDATE deckbattle
+                SET $coluna = :idmonstro
+                WHERE ideck = :ideck AND idsu = :idsu";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':idmonstro' => $idmonstro,
+            ':ideck' => $ideck,
+            ':idsu' => $idsu
+        ]);
+        $sql = "UPDATE monstro
+                SET nodeck = TRUE
+                WHERE id = :id";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':id' => $idmonstro]);
+        $pdo->commit();
+
+        return true;
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
 }
-
-
-?>

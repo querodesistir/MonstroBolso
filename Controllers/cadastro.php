@@ -14,17 +14,10 @@ try {
         exit;
     }
 } catch (PDOException $e) {
-
     switch ($e->getCode()) {
-
-        case 'HY093':
-            echo "Erro interno: quantidade de parâmetros incorreta.";
-            break;
-
         case '23000':
             echo "Este e-mail já está cadastrado.";
             break;
-
         default:
             error_log($e->getMessage());
             echo "Ocorreu um erro inesperado no cadastro.";

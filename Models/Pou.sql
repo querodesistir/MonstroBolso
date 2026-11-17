@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS monstro (
     FOREIGN KEY (tipid) REFERENCES tipo(tipid)
 );
 
-CREATE TABLE IF NOT EXISTS deckbattle (
+CREATE TABLE IF NOT EXISTS deck (
     ideck INT PRIMARY KEY,
     idsu INT NOT NULL,
     idm1 INT,
