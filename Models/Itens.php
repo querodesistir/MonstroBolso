@@ -6,16 +6,17 @@ private $nefeito;
 private $preco;
 private $descri;
 
-function function __construct($nomi, $nefeito, $preco, $descri) {
+function __construct($nomi, $nefeito, $preco, $descri) {
     $this->nomi = $nomi;
     $this->nefeito = $nefeito;
     $this->preco = $preco;
     $this->descri = $descri;
 }
 
-funtion Oloja(){
+function Listaloja(){
 
 } //fim oloja
+function Meusitens(){}
 
 function setItid($itid){
     $this->itid = $itid;
