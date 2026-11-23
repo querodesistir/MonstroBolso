@@ -1,19 +1,21 @@
 <?php
 class Batalha
 {
-    private $idba; 
+    private $idBa;
     private $ideck;
-    private $ideckMau;
+    private $deckMau;
     private $habitat;
-    private $datah;
+    private $vencedor;
+    private $data;
 
-    function __construct($iddeck, $deckInimigo, $habitat, $vencedor, $data)
+    function __construct($ideck, $deckMau, $habitat, $vencedor)
     {
-        $this->deckJogador = $iddeck;
-        $this->deckInimigo = $deckInimigo;
+        $this->ideck = $ideck;
+        $this->deckMau = $deckMau;
         $this->habitat = $habitat;
         $this->vencedor = $vencedor;
-        $this->data = $data;
     }
+
+    
 }
 ?>

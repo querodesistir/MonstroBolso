@@ -1,19 +1,23 @@
 <?php
-class LogDeBatalha
-    private $idBatalha;
-    private $idBatalha;
+class LogBatalha
+{
+    private $idlog;
+    private $idBa;
+    private $idsu;
     private $rodada;
     private $acao;
     private $dano;
+    private $itid;
     private $dataHora;
 
-    function __construct($idBatalha, $rodada, $acao, $dano, $dataHora)
+    function __construct($idBa, $idsu, $rodada, $acao, $dano, $itid = null)
     {
-        $this->idBatalha = $idBatalha;
+        $this->idBa = $idBa;
+        $this->idsu = $idsu;
         $this->rodada = $rodada;
         $this->acao = $acao;
         $this->dano = $dano;
-        $this->dataHora = $dataHora;
+        $this->itid = $itid;
     }
 }
 ?>
