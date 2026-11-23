@@ -10,8 +10,10 @@ class Monstro
     private $def;
     private $prio; //prioridade
     private $danoEspecial;
+
+    private $veloz;
     private $nodeck;
-    function __construct($nome,$imagem, $dano, $hp, $ahp, $def, $prio, $danoEspecial, $nodeck)
+    function __construct($nome,$imagem, $dano, $hp, $ahp, $def, $prio, $danoEspecial,$veloz, $nodeck)
     {
         $this->nome = $nome;
         $this->imagem = $imagem;
@@ -21,7 +23,8 @@ class Monstro
         $this->def = $def;
         $this->prio = $prio;
         $this->danoEspecial = $danoEspecial;
-        $this->nodeck = $nodeck;  //fazer set e get desse
+        $this ->veloz = $veloz;
+        $this->nodeck = $nodeck;
     }
 
     function buscarMonstro()
@@ -42,7 +45,7 @@ class Monstro
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT nome,magem,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = false
+        $sql = "SELECT nome,imagem,dano,hp, ahp, def, danoEspecial, veloz FROM Monstro where nodeck = false
     order by dano desc";
 
         $stmt = $pdo->prepare($sql);
@@ -55,12 +58,14 @@ class Monstro
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT nome,imagem,dano,hp, ahp, def, danoEspecial FROM Monstro where nodeck = true";
+      $sql = "SELECT id, nome, imagem, dano, hp, ahp, def, prio, danoEspecial, veloz
+      FROM Monstro
+      WHERE nodeck = true";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
 
-        return $stmt->fetchAll()(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     function AddaoDeck($id)
     {
@@ -126,6 +131,12 @@ class Monstro
     {
         $this->imagem = $imagem;
     }
+    function setVeloz($veloz){
+        $this->veloz = $veloz;
+    }
+    function setNodeck($nodeck){
+        $this->nodeck = $nodeck;
+    }
 
     function getId()
     {
@@ -155,5 +166,17 @@ class Monstro
     {
         return $this->imagem;
     }
+    function getVeloz(){
+        return $this->veloz;
+    }
+}
+ function getNodeck(){
+    return $this->nodeck;
+}
+ function getPrio(){
+    return $this->prio;
+}
+function getDanoEspecial(){
+    return $this->danoEspecial;
 }
 ?>

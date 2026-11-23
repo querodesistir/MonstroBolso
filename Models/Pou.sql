@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS monstro (
     prio INT,
     danoEspecial INT,
     tipid INT NOT NULL,
+    veloz int,
     nodeck BOOLEAN,
 
     FOREIGN KEY (tipid) REFERENCES tipo(tipid)
@@ -52,26 +53,26 @@ CREATE TABLE IF NOT EXISTS itens (
     descri VARCHAR(200)
 );
 
+CREATE TABLE batalha (
+    idBa INT AUTO_INCREMENT PRIMARY KEY,
+    ideck INT NOT NULL,
+    deckMau INT NOT NULL,
+    habitat VARCHAR(50) NOT NULL,
+    vencedor VARCHAR(20),
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-CREATE TABLE IF NOT EXISTS logbatalhas (
-    idlog INT PRIMARY KEY,
-    ideckMau INT,
-    ideck INT,
-    dano INT,
-    cura INT,
-
-    FOREIGN KEY (ideck) REFERENCES deckbattle(ideck),
-    FOREIGN KEY (ideckMau) REFERENCES deckbattle(ideck)
+    FOREIGN KEY (ideck) REFERENCES deck(ideck),
+    FOREIGN KEY (deckMau) REFERENCES deck(ideck)
 );
 
-INSERT IGNORE INTO tipo(tipid, elemento)
-VALUES (3, 'aquatico');
-
-INSERT IGNORE INTO tipo(tipid, elemento)
-VALUES (1, 'voador');
-
-INSERT IGNORE INTO monstro(id, nome, imagem, dano, hp, ahp, def,  prio, danoEspecial, tipid, nodeck)
-VALUES (4, 'Fogi', 'fogi.png', 5, 100, 100, 1,20, 3, 3, TRUE);
-
-INSERT IGNORE INTO monstro(id, nome, imagem, dano, hp, ahp, def, prio, danoEspecial, tipid, nodeck)
-VALUES ( 2, 'Quero-quero', 'quero.png', 10, 100, 100, 1, 30, 1, 1, FALSE);
+CREATE TABLE IF NOT EXISTS logbatalhas (
+    idlog INT AUTO_INCREMENT PRIMARY KEY,
+    idBa INT NOT NULL,
+    rodada INT NOT NULL,
+    participante VARCHAR(20) NOT NULL,
+    acao TEXT NOT NULL,
+    dano INT DEFAULT 0,
+    itid INT DEFAULT NULL,
+    FOREIGN KEY (idBa) REFERENCES batalha(idBa),
+    FOREIGN KEY (itid) REFERENCES itens(itid)
+);
