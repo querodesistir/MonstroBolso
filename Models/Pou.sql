@@ -69,10 +69,11 @@ CREATE TABLE IF NOT EXISTS logbatalhas (
     idlog INT AUTO_INCREMENT PRIMARY KEY,
     idBa INT NOT NULL,
     rodada INT NOT NULL,
-    participante VARCHAR(20) NOT NULL,
     acao TEXT NOT NULL,
     dano INT DEFAULT 0,
     itid INT DEFAULT NULL,
+    idsu INT NOT NULL,
+    FOREIGN KEY (idsu) REFERENCES usuario(idsu)
     FOREIGN KEY (idBa) REFERENCES batalha(idBa),
     FOREIGN KEY (itid) REFERENCES itens(itid)
 );
