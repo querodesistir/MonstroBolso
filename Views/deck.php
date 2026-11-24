@@ -8,222 +8,275 @@
 
     <title>Meu Deck - MonstroBolso</title>
 
-    <link rel="stylesheet" href="css/deck.css">
     <style>
 
-/* CONFIGURAÇÕES GERAIS */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-body {
-    font-family: 'Trebuchet MS', Arial, sans-serif;
-    background-color: #1c2333;
-    color: #f8f0d8;
-    min-height: 100vh;
-}
+        /* CONFIGURAÇÕES GERAIS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Trebuchet MS', Arial, sans-serif;
+            background-color: #1c2333;
+            color: #f8f0d8;
+            min-height: 100vh;
+        }
 
 
-/* CABEÇALHO */
-.cabecalho {
-    text-align: center;
-    padding: 35px 15px;
+        /* CABEÇALHO */
+        .cabecalho {
+            text-align: center;
+            padding: 35px 15px;
 
-    background: linear-gradient(
-        135deg,
-        #354568,
-        #1c2333
-    );
-    border-bottom: 4px solid #ffd75e;
-}
-.cabecalho h1 {
-    color: #ffd75e;
-    font-size: 36px;
-    letter-spacing: 3px;
-    text-shadow: 3px 3px #111;
-}
-.cabecalho p {
-    margin-top: 10px;
-    color: #cfd8ee;
-}
+            background: linear-gradient(
+                135deg,
+                #354568,
+                #1c2333
+            );
 
+            border-bottom: 4px solid #ffd75e;
+        }
 
-/* CONTEÚDO PRINCIPAL */
-.conteudo {
-    max-width: 1000px;
-    margin: 35px auto;
-    padding: 0 20px;
-}
+        .cabecalho h1 {
+            color: #ffd75e;
+            font-size: 36px;
+            letter-spacing: 3px;
+            text-shadow: 3px 3px #111;
+        }
+
+        .cabecalho p {
+            margin-top: 10px;
+            color: #cfd8ee;
+        }
 
 
-/* SEÇÕES */
-.secao {
-    background: #2d3a5c;
-    padding: 22px;
-    margin-bottom: 30px;
-    border-radius: 15px;
-    border: 2px solid #52658e;
-    box-shadow: 5px 5px 0 #111827;
-}
-
-/* TÍTULOS DAS SEÇÕES */
-.titulo-secao {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.titulo-secao h2 {
-    color: #ffd75e;
-    font-size: 24px;
-}
-.titulo-secao p {
-    color: #cfd8ee;
-    font-size: 13px;
-    margin-top: 5px;
-}
+        /* CONTEÚDO */
+        .conteudo {
+            max-width: 1000px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
 
 
-/* CONTADOR */
-.contador {
-    background: #ffd75e;
-    color: #252525;
-    padding: 9px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-}
+        /* SEÇÕES */
+        .secao {
+            background: #2d3a5c;
+            padding: 22px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            border: 2px solid #52658e;
+            box-shadow: 5px 5px 0 #111827;
+        }
 
 
-/* TABELAS */
-.tabela-container {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 10px;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #f8f0d8;
-    color: #252525;
-    min-width: 600px;
-}
-th {
-    background: #354568;
-    color: #ffffff;
-    padding: 14px 10px;
-    text-align: center;
-    font-size: 14px;
-}
-td {
-    padding: 13px 10px;
-    text-align: center;
-    border-bottom: 1px solid #d1c7a9;
-}
+        /* TÍTULOS */
+        .titulo-secao {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .titulo-secao h2 {
+            color: #ffd75e;
+            font-size: 24px;
+        }
+
+        .titulo-secao p {
+            color: #cfd8ee;
+            font-size: 13px;
+            margin-top: 5px;
+        }
 
 
-/* NOME DOS MONSTROS */
-.nome-monstro {
-    font-weight: bold;
-    color: #354568;
-}
+        /* AÇÕES DO DECK */
+        .acoes-deck {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contador {
+            background: #ffd75e;
+            color: #252525;
+            padding: 9px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        #btn-renovar {
+            background: #ffd75e;
+            color: #252525;
+            border: 2px solid #252525;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #btn-renovar:hover {
+            background: #f0bd35;
+        }
+
+        #btn-renovar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
 
-/* FOTOS DOS MONSTROS */
-.foto-monstro {
-    width: 75px;
-    height: 75px;
+        /* TABELAS */
+        .tabela-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 10px;
+        }
 
-    object-fit: contain;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f8f0d8;
+            color: #252525;
+            min-width: 600px;
+        }
 
-    border-radius: 10px;
+        th {
+            background: #354568;
+            color: #ffffff;
+            padding: 14px 10px;
+            text-align: center;
+            font-size: 14px;
+        }
 
-    background-color: #ffffff;
-
-    padding: 4px;
-}
-.foto-erro {
-    border: 2px dashed #c9553d;
-}
-
-/* EFEITO NAS LINHAS */
-.linha-monstro {
-    transition: background 0.2s;
-}
-.linha-monstro:hover {
-    background: #fff5d7;
-}
-
-/* BOTÕES */
-.botao-acao {
-    border: 2px solid #252525;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.15s, background 0.15s;
-}
-.botao-acao:hover {
-    transform: translateY(-2px);
-}
-.botao-acao:active {
-    transform: translateY(1px);
-}
+        td {
+            padding: 13px 10px;
+            text-align: center;
+            border-bottom: 1px solid #d1c7a9;
+        }
 
 
-/* BOTÃO SELECIONAR */
-.botao-adicionar {
-    background: #65cf78;
-    color: #18351d;
-}
-.botao-adicionar:hover {
-    background: #49b85e;
-}
+        /* NOMES */
+        .nome-monstro {
+            font-weight: bold;
+            color: #354568;
+        }
 
-/* BOTÃO RETIRAR */
-.botao-retirar {
-    background: #e47c68;
-    color: #451b13;
-}
-.botao-retirar:hover {
-    background: #d95c48;
-}
 
-/* TABELA VAZIA */
-.vazio {
-    padding: 25px;
-    color: #777;
-    font-style: italic;
-}
+        /* FOTOS */
+        .foto-monstro {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+            border-radius: 10px;
+            background-color: #ffffff;
+            padding: 4px;
+        }
 
-/* MENSAGENS */
-.mensagem {
-    text-align: center;
-    margin: 20px 0;
-    font-weight: bold;
-    min-height: 20px;
-}
-.sucesso {
-    color: #65cf78;
-}
-.erro {
-    color: #ff8270;
-}
+        .foto-erro {
+            border: 2px dashed #c9553d;
+        }
 
-/* TELAS MENORES */
 
-@media (max-width: 600px) {
-    .cabecalho h1 {
-        font-size: 26px;
-    }
-    .secao {
-        padding: 13px;
-    }
-    .titulo-secao h2 {
-        font-size: 20px;
-    }
-}
+        /* LINHAS */
+        .linha-monstro {
+            transition: background 0.2s;
+        }
+
+        .linha-monstro:hover {
+            background: #fff5d7;
+        }
+
+
+        /* BOTÕES */
+        .botao-acao {
+            border: 2px solid #252525;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+
+            transition:
+                transform 0.15s,
+                background 0.15s;
+        }
+
+        .botao-acao:hover {
+            transform: translateY(-2px);
+        }
+
+        .botao-acao:active {
+            transform: translateY(1px);
+        }
+
+        .botao-adicionar {
+            background: #65cf78;
+            color: #18351d;
+        }
+
+        .botao-adicionar:hover {
+            background: #49b85e;
+        }
+
+        .botao-retirar {
+            background: #e47c68;
+            color: #451b13;
+        }
+
+        .botao-retirar:hover {
+            background: #d95c48;
+        }
+
+
+        /* TABELA VAZIA */
+        .vazio {
+            padding: 25px;
+            color: #777;
+            font-style: italic;
+        }
+
+
+        /* MENSAGENS */
+        .mensagem {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            min-height: 20px;
+        }
+
+        .sucesso {
+            color: #65cf78;
+        }
+
+        .erro {
+            color: #ff8270;
+        }
+
+
+        /* TELAS MENORES */
+        @media (max-width: 600px) {
+
+            .cabecalho h1 {
+                font-size: 26px;
+            }
+
+            .secao {
+                padding: 13px;
+            }
+
+            .titulo-secao h2 {
+                font-size: 20px;
+            }
+
+            .titulo-secao {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+        }
     </style>
+
 </head>
 
 <body>
@@ -233,23 +286,38 @@ td {
         <p>Monte sua equipe e prepare seus monstros!</p>
     </header>
 
+
     <main class="conteudo">
 
         <!-- DECK DO JOGADOR -->
         <section class="secao">
 
             <div class="titulo-secao">
+
                 <div>
                     <h2>Meu Deck</h2>
                     <p>Seus monstros selecionados</p>
                 </div>
 
-                <span class="contador" id="contadorDeck">0/3</span>
+                <div class="acoes-deck">
+
+                    <span class="contador" id="contadorDeck">
+                        0/3
+                    </span>
+
+                    <button type="button" id="btn-renovar">
+                        Renovar Deck
+                    </button>
+
+                </div>
+
             </div>
+
 
             <div class="tabela-container">
 
                 <table>
+
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -262,6 +330,7 @@ td {
                     </thead>
 
                     <tbody id="tabelaDeck"></tbody>
+
                 </table>
 
             </div>
@@ -273,15 +342,19 @@ td {
         <section class="secao">
 
             <div class="titulo-secao">
+
                 <div>
                     <h2>Monstros disponíveis</h2>
                     <p>Escolha monstros para completar seu deck</p>
                 </div>
+
             </div>
+
 
             <div class="tabela-container">
 
                 <table>
+
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -294,11 +367,13 @@ td {
                     </thead>
 
                     <tbody id="tabelaDisponiveis"></tbody>
+
                 </table>
 
             </div>
 
         </section>
+
 
         <div id="mensagem" class="mensagem"></div>
 
@@ -307,13 +382,10 @@ td {
 
 <script>
 
-// Caminho do Controller
 const urlController = "../Controllers/DeckController.php";
 
-// Caminho da pasta de imagens
 const pastaImagens = "imagem/";
 
-// Referências às tabelas
 const tabelaDeck = document.getElementById('tabelaDeck');
 
 const tabelaDisponiveis = document.getElementById('tabelaDisponiveis');
@@ -322,43 +394,52 @@ const contadorDeck = document.getElementById('contadorDeck');
 
 const mensagem = document.getElementById('mensagem');
 
+const btnRenovar = document.getElementById('btn-renovar');
 
-// 1. Busca os dados no Controller
 async function carregarDeck() {
 
     try {
 
-        const resposta = await fetch(urlController + "?acao=listar");
+        const resposta = await fetch(
+            urlController + "?acao=listar"
+        );
 
         const dados = await resposta.json();
 
         if (!resposta.ok || !dados.ok) {
-            throw new Error(dados.erro || "Erro ao carregar o deck.");
+            throw new Error(
+                dados.erro || "Erro ao carregar o deck."
+            );
         }
 
-        // Preenche a tabela do jogador
-        montarTabela(tabelaDeck, dados.deck, "retirar");
+        montarTabela(
+            tabelaDeck,
+            dados.deck,
+            "retirar"
+        );
 
-        // Preenche a tabela dos disponíveis
-        montarTabela(tabelaDisponiveis, dados.disponiveis, "adicionar");
+        montarTabela(
+            tabelaDisponiveis,
+            dados.disponiveis,
+            "adicionar"
+        );
 
-        // Atualiza o contador
         contadorDeck.textContent = dados.deck.length + "/3";
 
-        mensagem.textContent = "";
+        return true;
 
     } catch (erro) {
 
         console.error(erro);
 
         mensagem.textContent = erro.message;
+
         mensagem.className = "mensagem erro";
 
+        return false;
     }
 }
 
-
-// 2. Monta as tabelas utilizando os dados do JSON
 function montarTabela(tabela, monstros, acao) {
 
     tabela.replaceChildren();
@@ -382,6 +463,7 @@ function montarTabela(tabela, monstros, acao) {
         return;
     }
 
+
     monstros.forEach(function(monstro) {
 
         const linha = document.createElement('tr');
@@ -389,7 +471,7 @@ function montarTabela(tabela, monstros, acao) {
         linha.className = "linha-monstro";
 
 
-        // Nome
+        // NOME
         const nome = document.createElement('td');
 
         nome.textContent = monstro.nome;
@@ -399,7 +481,7 @@ function montarTabela(tabela, monstros, acao) {
         linha.appendChild(nome);
 
 
-        // Foto
+        // FOTO
         const fotoCelula = document.createElement('td');
 
         const foto = document.createElement('img');
@@ -410,12 +492,11 @@ function montarTabela(tabela, monstros, acao) {
 
         foto.loading = "lazy";
 
-        // O banco guarda somente o nome completo do arquivo
+        // O banco guarda apenas o nome completo do arquivo
         // Exemplo: flamigato.png
-        // O caminho Views/imagem/ é montado aqui
-        foto.src = pastaImagens + encodeURIComponent(monstro.imagem);
+        foto.src = pastaImagens +
+            encodeURIComponent(monstro.imagem);
 
-        // Caso a imagem não seja encontrada
         foto.onerror = function() {
 
             foto.alt = "Imagem não encontrada";
@@ -429,7 +510,7 @@ function montarTabela(tabela, monstros, acao) {
         linha.appendChild(fotoCelula);
 
 
-        // Dano
+        // DANO
         const dano = document.createElement('td');
 
         dano.textContent = monstro.dano;
@@ -445,7 +526,7 @@ function montarTabela(tabela, monstros, acao) {
         linha.appendChild(hp);
 
 
-        // Defesa
+        // DEFESA
         const defesa = document.createElement('td');
 
         defesa.textContent = monstro.def;
@@ -453,7 +534,7 @@ function montarTabela(tabela, monstros, acao) {
         linha.appendChild(defesa);
 
 
-        // Botão de ação
+        // BOTÃO DE AÇÃO
         const acaoCelula = document.createElement('td');
 
         const botao = document.createElement('button');
@@ -486,37 +567,42 @@ function montarTabela(tabela, monstros, acao) {
 
         linha.appendChild(acaoCelula);
 
-
-        // Adiciona a linha na tabela
         tabela.appendChild(linha);
 
     });
 
 }
 
-
-// 3. Envia a ação para o Controller
-async function alterarDeck(acao, id) {
+async function alterarDeck(acao, id = null) {
 
     try {
-
-        const formulario = new FormData();
-
-        formulario.append('id', id);
 
         mensagem.textContent = "Atualizando deck...";
 
         mensagem.className = "mensagem";
 
 
+        const opcoes = {
+            method: "POST"
+        };
+
+
+        // Adicionar e retirar precisam do ID do monstro
+        if (id !== null) {
+
+            const formulario = new FormData();
+
+            formulario.append('id', id);
+
+            opcoes.body = formulario;
+        }
+
+
         const resposta = await fetch(
 
-            urlController + "?acao=" + acao,
+            urlController + "?acao=" + encodeURIComponent(acao),
 
-            {
-                method: "POST",
-                body: formulario
-            }
+            opcoes
 
         );
 
@@ -524,16 +610,34 @@ async function alterarDeck(acao, id) {
 
         if (!resposta.ok || !dados.ok) {
 
-            throw new Error(dados.erro || "Não foi possível alterar o deck.");
+            throw new Error(
+                dados.erro || "Não foi possível alterar o deck."
+            );
+        }
+
+
+        // Atualiza as tabelas
+        const carregou = await carregarDeck();
+
+        if (!carregou) {
+            throw new Error(
+                "A operação foi realizada, mas não foi possível atualizar a página."
+            );
+        }
+
+
+        if (acao === "renovar") {
+
+            mensagem.textContent = "Seu novo deck está pronto!";
+
+        } else {
+
+            mensagem.textContent = "Deck atualizado!";
 
         }
 
-        mensagem.textContent = "Deck atualizado!";
-
         mensagem.className = "mensagem sucesso";
 
-        // Atualiza as duas tabelas
-        await carregarDeck();
 
     } catch (erro) {
 
@@ -548,7 +652,33 @@ async function alterarDeck(acao, id) {
 }
 
 
-// 4. Carrega os dados quando a página abre
+//BOTÃO DE RENOVAR DECK
+btnRenovar.addEventListener('click', async function() {
+
+    const confirmar = confirm(
+        "Deseja renovar seu deck? Os três monstros atuais serão substituídos por um deck vazio."
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    btnRenovar.disabled = true;
+
+    try {
+
+        await alterarDeck("renovar");
+
+    } finally {
+
+        btnRenovar.disabled = false;
+
+    }
+
+});
+
+
+//CARREGAR QUANDO A PÁGINA ABRIR
 carregarDeck();
 
 </script>

@@ -7,12 +7,12 @@ CREATE TABLE IF NOT EXISTS usuario (
     apelido VARCHAR(30) NOT NULL,
     dindin INT DEFAULT 0,
     nivel INT DEFAULT 0
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS tipo (
     tipid INT NOT NULL PRIMARY KEY,
     elemento VARCHAR(10)
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS monstro (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -25,24 +25,25 @@ CREATE TABLE IF NOT EXISTS monstro (
     prio INT,
     danoEspecial INT,
     tipid INT NOT NULL,
-    veloz int,
+    veloz INT,
 
     FOREIGN KEY (tipid) REFERENCES tipo(tipid)
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS deck (
     ideck INT AUTO_INCREMENT PRIMARY KEY,
     idsu INT NOT NULL,
-    idm1 INT,
-    idm2 INT,
-    idm3 INT,
+    idm1 INT DEFAULT NULL,
+    idm2 INT DEFAULT NULL,
+    idm3 INT DEFAULT NULL,
     titulo VARCHAR(12) DEFAULT 'FolhaX',
+    descartado TINYINT(1) NOT NULL DEFAULT 0,
 
     FOREIGN KEY (idsu) REFERENCES usuario(idsu),
     FOREIGN KEY (idm1) REFERENCES monstro(id),
     FOREIGN KEY (idm2) REFERENCES monstro(id),
     FOREIGN KEY (idm3) REFERENCES monstro(id)
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS itens (
     itid INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -50,9 +51,9 @@ CREATE TABLE IF NOT EXISTS itens (
     nefeito INT NOT NULL,
     preco DECIMAL(10,2) NOT NULL,
     descri VARCHAR(200)
-);
+) ENGINE=InnoDB;
 
-CREATE TABLE batalha (
+CREATE TABLE IF NOT EXISTS batalha (
     idBa INT AUTO_INCREMENT PRIMARY KEY,
     ideck INT NOT NULL,
     deckMau INT NOT NULL,
@@ -62,7 +63,7 @@ CREATE TABLE batalha (
 
     FOREIGN KEY (ideck) REFERENCES deck(ideck),
     FOREIGN KEY (deckMau) REFERENCES deck(ideck)
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS logbatalhas (
     idlog INT AUTO_INCREMENT PRIMARY KEY,
@@ -72,9 +73,8 @@ CREATE TABLE IF NOT EXISTS logbatalhas (
     dano INT DEFAULT 0,
     itid INT DEFAULT NULL,
     idsu INT NOT NULL,
-    FOREIGN KEY (idsu) REFERENCES usuario(idsu)
+
+    FOREIGN KEY (idsu) REFERENCES usuario(idsu),
     FOREIGN KEY (idBa) REFERENCES batalha(idBa),
     FOREIGN KEY (itid) REFERENCES itens(itid)
-);
-ALTER TABLE deck
-ADD COLUMN descartado TINYINT(1) NOT NULL DEFAULT 0;
+) ENGINE=InnoDB;

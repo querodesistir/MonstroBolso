@@ -1,4 +1,6 @@
+
 <?php
+
 class Deck
 {
     private $ideck;
@@ -15,361 +17,389 @@ class Deck
         $this->titulo = $titulo;
     }
 
-function Addeck($ideck, $idsu, $id)
-{
-    $con = new conexao();
-    $pdo = $con->pdo;
 
-    try {
-        $pdo->beginTransaction();
+    // ADICIONAR MONSTRO AO DECK
+    function Addeck($ideck, $idsu, $id)
+    {
+        $con = new conexao();
+        $pdo = $con->pdo;
 
-        $sql = "SELECT idm1, idm2, idm3
-                FROM deck
-                WHERE ideck = :ideck
-                AND idsu = :idsu
-                AND descartado = 0
-                FOR UPDATE";
+        try {
+            $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare($sql);
+            // Busca o deck específico do usuário
+            $sql = "SELECT idm1, idm2, idm3
+                    FROM deck
+                    WHERE ideck = :ideck
+                    AND idsu = :idsu
+                    AND descartado = 0
+                    FOR UPDATE";
 
-        $stmt->execute([
-            ':ideck' => $ideck,
-            ':idsu' => $idsu
-        ]);
+            $stmt = $pdo->prepare($sql);
 
-        $deck = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute([
+                ':ideck' => $ideck,
+                ':idsu' => $idsu
+            ]);
 
-        if (!$deck) {
-            $pdo->rollBack();
-            return false;
-        }
-        $sql = "SELECT id
-                FROM monstro
-                WHERE id = :id";
+            $deck = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            ':id' => $id
-        ]);
-
-        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
-            $pdo->rollBack();
-            return false;
-        }
-
-        // Verifica se o monstro já está nesse deck
-        foreach (['idm1', 'idm2', 'idm3'] as $campo) {
-
-            if ($deck[$campo] !== null &&
-                (int)$deck[$campo] === (int)$id) {
-
+            if (!$deck) {
                 $pdo->rollBack();
                 return false;
             }
-        }
 
-        $coluna = null;
+            // Verifica se o monstro existe
+            $sql = "SELECT id
+                    FROM monstro
+                    WHERE id = :id";
 
-        foreach (['idm1', 'idm2', 'idm3'] as $campo) {
+            $stmt = $pdo->prepare($sql);
 
-            if ($deck[$campo] === null) {
-                $coluna = $campo;
-                break;
+            $stmt->execute([
+                ':id' => $id
+            ]);
+
+            if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+                $pdo->rollBack();
+                return false;
             }
-        }
 
-        if ($coluna === null) {
-            $pdo->rollBack();
-            return false;
-        }
+            // Verifica se o monstro já está nesse deck
+            foreach (['idm1', 'idm2', 'idm3'] as $campo) {
 
-        // 5. Adiciona o monstro na posição encontrada
-        $sql = "UPDATE deck
-                SET $coluna = :id
-                WHERE ideck = :ideck
-                AND idsu = :idsu
-                AND descartado = 0";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            ':id' => $id,
-            ':ideck' => $ideck,
-            ':idsu' => $idsu
-        ]);
-
-        $pdo->commit();
-
-        return true;
-
-    } catch (Throwable $e) {
-
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-
-        throw $e;
-    }
-}
-
-function TiradoDeck($ideck, $idsu, $id)
-{
-    $con = new conexao();
-    $pdo = $con->pdo;
-
-    try {
-        $pdo->beginTransaction();
-
-        $sql = "SELECT idm1, idm2, idm3
-                FROM deck
-                WHERE ideck = :ideck
-                AND idsu = :idsu
-                AND descartado = 0
-                FOR UPDATE";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            ':ideck' => $ideck,
-            ':idsu' => $idsu
-        ]);
-
-        $deck = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$deck) {
-            $pdo->rollBack();
-            return false;
-        }
-
-        $coluna = null;
-
-        foreach (['idm1', 'idm2', 'idm3'] as $campo) {
-
-            if ($deck[$campo] !== null &&
-                (int)$deck[$campo] === (int)$id) {
-
-                $coluna = $campo;
-                break;
+                if (
+                    $deck[$campo] !== null &&
+                    (int)$deck[$campo] === (int)$id
+                ) {
+                    $pdo->rollBack();
+                    return false;
+                }
             }
+
+            // Procura uma posição vazia
+            $coluna = null;
+
+            foreach (['idm1', 'idm2', 'idm3'] as $campo) {
+
+                if ($deck[$campo] === null) {
+                    $coluna = $campo;
+                    break;
+                }
+            }
+
+            if ($coluna === null) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            // Adiciona o monstro na posição encontrada
+            $sql = "UPDATE deck
+                    SET $coluna = :id
+                    WHERE ideck = :ideck
+                    AND idsu = :idsu
+                    AND descartado = 0";
+
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                ':id' => $id,
+                ':ideck' => $ideck,
+                ':idsu' => $idsu
+            ]);
+
+            $pdo->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $e;
         }
-
-        if ($coluna === null) {
-            $pdo->rollBack();
-            return false;
-        }
-
-        $sql = "UPDATE deck
-                SET $coluna = NULL
-                WHERE ideck = :ideck
-                AND idsu = :idsu
-                AND descartado = 0";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            ':ideck' => $ideck,
-            ':idsu' => $idsu
-        ]);
-
-        $pdo->commit();
-
-        return true;
-
-    } catch (Throwable $e) {
-
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-
-        throw $e;
     }
-}
 
 
-function salvarDeck($idsu, $titulo, $pdo)
-{
+    // RETIRAR MONSTRO DO DECK
+    function TiradoDeck($ideck, $idsu, $id)
+    {
+        $con = new conexao();
+        $pdo = $con->pdo;
 
-    $sql = "INSERT INTO deck (idsu, titulo)
-            VALUES (:idsu, :titulo)";
+        try {
+            $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare($sql);
+            // Busca o deck específico do usuário
+            $sql = "SELECT idm1, idm2, idm3
+                    FROM deck
+                    WHERE ideck = :ideck
+                    AND idsu = :idsu
+                    AND descartado = 0
+                    FOR UPDATE";
 
-    $stmt->execute([
-        ':idsu' => $idsu,
-        ':titulo' => $titulo
-    ]);
+            $stmt = $pdo->prepare($sql);
 
-    $this->ideck = $pdo->lastInsertId();
+            $stmt->execute([
+                ':ideck' => $ideck,
+                ':idsu' => $idsu
+            ]);
 
-    return $this->ideck;
-}
+            $deck = $stmt->fetch(PDO::FETCH_ASSOC);
 
-function renovarDeck($idsuJogador)
-{
-    $con = new conexao();
-    $pdo = $con->pdo;
+            if (!$deck) {
+                $pdo->rollBack();
+                return false;
+            }
 
-    try {
-        $pdo->beginTransaction();
+            // Descobre a posição do monstro
+            $coluna = null;
 
-//Localiza e bloqueia temporáriamente o usuário inimigo para evitar comflitos de transferencias simultaneas
-        $sql = "SELECT idsu
-                FROM usuario
-                WHERE email = :email
-                FOR UPDATE";
+            foreach (['idm1', 'idm2', 'idm3'] as $campo) {
+
+                if (
+                    $deck[$campo] !== null &&
+                    (int)$deck[$campo] === (int)$id
+                ) {
+                    $coluna = $campo;
+                    break;
+                }
+            }
+
+            if ($coluna === null) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            // Deixa a posição vazia
+            $sql = "UPDATE deck
+                    SET $coluna = NULL
+                    WHERE ideck = :ideck
+                    AND idsu = :idsu
+                    AND descartado = 0";
+
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                ':ideck' => $ideck,
+                ':idsu' => $idsu
+            ]);
+
+            $pdo->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $e;
+        }
+    }
+
+
+    // CRIAR UM NOVO DECK
+    function salvarDeck($idsu, $titulo, $pdo)
+    {
+        // Utiliza a conexão recebida, sem criar outra
+        $sql = "INSERT INTO deck (idsu, titulo)
+                VALUES (:idsu, :titulo)";
 
         $stmt = $pdo->prepare($sql);
 
         $stmt->execute([
-            ':email' => 'inimigo@inimigo'
+            ':idsu' => $idsu,
+            ':titulo' => $titulo
         ]);
 
-        $idsuInimigo = $stmt->fetchColumn();
+        $this->ideck = $pdo->lastInsertId();
 
-        // Impede transferir o deck para o próprio usuário
-        if ((int)$idsuJogador === (int)$idsuInimigo) {
-            $pdo->rollBack();
-            return false;
-        }
-        $sql = "SELECT ideck, idm1, idm2, idm3
+        return $this->ideck;
+    }
+
+
+    // BUSCAR O DECK ATIVO DO USUÁRIO
+    function buscarDeckAtivo($idsu)
+    {
+        $con = new conexao();
+        $pdo = $con->pdo;
+
+        $sql = "SELECT ideck, idm1, idm2, idm3, titulo
                 FROM deck
                 WHERE idsu = :idsu
                 AND descartado = 0
                 ORDER BY ideck DESC
-                LIMIT 1
-                FOR UPDATE";
+                LIMIT 1";
 
         $stmt = $pdo->prepare($sql);
 
         $stmt->execute([
-            ':idsu' => $idsuJogador
+            ':idsu' => $idsu
         ]);
 
-        $deckJogador = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
-        if (!$deckJogador) {
-            $pdo->rollBack();
-            return false;
-        }
-        $idsJogador = [
-            $deckJogador['idm1'],
-            $deckJogador['idm2'],
-            $deckJogador['idm3']
-        ];
 
-        // Verifica se o deck possui três monstros
-        if (in_array(null, $idsJogador, true)) {
-            $pdo->rollBack();
-            return false;
-        }
+    // RENOVAR O DECK DO JOGADOR
+    function renovarDeck($idsuJogador)
+    {
+        $con = new conexao();
+        $pdo = $con->pdo;
 
-        //Organiza os IDs para comparar sem considerar a ordem
-        $idsJogador = array_map('intval', $idsJogador);
+        try {
+            $pdo->beginTransaction();
 
-        sort($idsJogador, SORT_NUMERIC);
-        $sql = "SELECT idm1, idm2, idm3
-                FROM deck
-                WHERE idsu = :idsu
-                AND descartado = 0
-                AND idm1 IS NOT NULL
-                AND idm2 IS NOT NULL
-                AND idm3 IS NOT NULL
-                FOR UPDATE";
+            // Localiza e bloqueia o usuário inimigo
+            // para organizar transferências simultâneas
+            $sql = "SELECT idsu
+                    FROM usuario
+                    WHERE email = :email
+                    FOR UPDATE";
 
-        $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
 
-        $stmt->execute([
-            ':idsu' => $idsuInimigo
-        ]);
+            $stmt->execute([
+                ':email' => 'inimigo@inimigo'
+            ]);
 
-        $duplicado = false;
+            $idsuInimigo = $stmt->fetchColumn();
 
-        while ($deckInimigo = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            // Impede transferir o deck para o próprio usuário
+            if ((int)$idsuJogador === (int)$idsuInimigo) {
+                $pdo->rollBack();
+                return false;
+            }
 
-            $idsInimigo = [
-                (int)$deckInimigo['idm1'],
-                (int)$deckInimigo['idm2'],
-                (int)$deckInimigo['idm3']
+            // Busca o deck ativo do jogador
+            $sql = "SELECT ideck, idm1, idm2, idm3
+                    FROM deck
+                    WHERE idsu = :idsu
+                    AND descartado = 0
+                    ORDER BY ideck DESC
+                    LIMIT 1
+                    FOR UPDATE";
+
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                ':idsu' => $idsuJogador
+            ]);
+
+            $deckJogador = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$deckJogador) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            // Recupera os três IDs
+            $idsJogador = [
+                $deckJogador['idm1'],
+                $deckJogador['idm2'],
+                $deckJogador['idm3']
             ];
 
-            sort($idsInimigo, SORT_NUMERIC);
-
-            if ($idsJogador === $idsInimigo) {
-                $duplicado = true;
-                break;
+            // O deck precisa estar completo
+            if (in_array(null, $idsJogador, true)) {
+                $pdo->rollBack();
+                return false;
             }
-        }
 
-        if ($duplicado) {
+            // Ordena os IDs para comparar sem considerar a posição
+            $idsJogador = array_map('intval', $idsJogador);
 
-            // Descarta o deck sem apagar o registro
-            $sql = "UPDATE deck
-                    SET descartado = 1
-                    WHERE ideck = :ideck
-                    AND idsu = :idsu";
+            sort($idsJogador, SORT_NUMERIC);
 
-            $stmt = $pdo->prepare($sql);
-
-            $stmt->execute([
-                ':ideck' => $deckJogador['ideck'],
-                ':idsu' => $idsuJogador
-            ]);
-
-        } else {
-            $sql = "UPDATE deck
-                    SET idsu = :idsuInimigo
-                    WHERE ideck = :ideck
-                    AND idsu = :idsu";
+            // Busca os decks completos e ativos do inimigo
+            $sql = "SELECT idm1, idm2, idm3
+                    FROM deck
+                    WHERE idsu = :idsu
+                    AND descartado = 0
+                    AND idm1 IS NOT NULL
+                    AND idm2 IS NOT NULL
+                    AND idm3 IS NOT NULL
+                    FOR UPDATE";
 
             $stmt = $pdo->prepare($sql);
 
             $stmt->execute([
-                ':idsuInimigo' => $idsuInimigo,
-                ':ideck' => $deckJogador['ideck'],
-                ':idsu' => $idsuJogador
+                ':idsu' => $idsuInimigo
             ]);
+
+            $duplicado = false;
+
+            // Compara as combinações
+            while ($deckInimigo = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+                $idsInimigo = [
+                    (int)$deckInimigo['idm1'],
+                    (int)$deckInimigo['idm2'],
+                    (int)$deckInimigo['idm3']
+                ];
+
+                sort($idsInimigo, SORT_NUMERIC);
+
+                if ($idsJogador === $idsInimigo) {
+                    $duplicado = true;
+                    break;
+                }
+            }
+
+            if ($duplicado) {
+
+                // Descarta logicamente o deck repetido
+                $sql = "UPDATE deck
+                        SET descartado = 1
+                        WHERE ideck = :ideck
+                        AND idsu = :idsu";
+
+                $stmt = $pdo->prepare($sql);
+
+                $stmt->execute([
+                    ':ideck' => $deckJogador['ideck'],
+                    ':idsu' => $idsuJogador
+                ]);
+
+            } else {
+
+                // Transfere o deck para o inimigo
+                $sql = "UPDATE deck
+                        SET idsu = :idsuInimigo
+                        WHERE ideck = :ideck
+                        AND idsu = :idsu";
+
+                $stmt = $pdo->prepare($sql);
+
+                $stmt->execute([
+                    ':idsuInimigo' => $idsuInimigo,
+                    ':ideck' => $deckJogador['ideck'],
+                    ':idsu' => $idsuJogador
+                ]);
+            }
+
+            // Cria um deck vazio para o jogador
+            $novoIdeck = $this->salvarDeck(
+                $idsuJogador,
+                'FolhaX',
+                $pdo
+            );
+
+            $pdo->commit();
+
+            return $novoIdeck;
+
+        } catch (Throwable $e) {
+
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $e;
         }
-
-        $novoIdeck = $this->salvarDeck(
-            $idsuJogador,
-            'FolhaX',
-            $pdo
-        );
-
-        $pdo->commit();
-
-        return $novoIdeck;
-
-    } catch (Throwable $e) {
-  
-    if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-
-        throw $e;
     }
-}
-
-function buscarDeckAtivo($idsu)
-{
-    $con = new conexao();
-    $pdo = $con->pdo;
-
-    $sql = "SELECT ideck, idm1, idm2, idm3, titulo
-            FROM deck
-            WHERE idsu = :idsu
-            AND descartado = 0
-            ORDER BY ideck DESC
-            LIMIT 1";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([
-        ':idsu' => $idsu
-    ]);
-
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
-}  ?> 
+}  ?>
