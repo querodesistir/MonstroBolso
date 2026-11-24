@@ -1,24 +1,28 @@
 <?php
 class Item_su {
+
     private $idsu;
     private $iditem;
     private $quantidade;
 
-    function __construct($idsu, $iditem, $quantidade) {
+    public function __construct($idsu, $iditem, $quantidade) {
         $this->idsu = $idsu;
         $this->iditem = $iditem;
         $this->quantidade = $quantidade;
     }
 
-    function ListarItensUsu($idsu) {
+    // Lista os itens que pertencem ao usuário
+    public static function ListarItensUsu($idsu) {
 
         $con = new conexao();
         $pdo = $con->pdo;
 
         $sql = "SELECT loja.iditem, loja.nome, item_su.quantidade
-                FROM item_su INNER JOIN loja 
+                FROM item_su
+                INNER JOIN loja
                 ON item_su.iditem = loja.iditem
-                WHERE item_su.idsu = :idsu";
+                WHERE item_su.idsu = :idsu
+                AND item_su.quantidade > 0";
 
         $stmt = $pdo->prepare($sql);
 
@@ -27,9 +31,10 @@ class Item_su {
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }  // fim do itens do usuario
 
-    function usarItem(){
+    } // fim ListarItensUsu
+
+public function usarItem() {
 
     $con = new conexao();
     $pdo = $con->pdo;
@@ -47,32 +52,44 @@ class Item_su {
 
     $stmt->execute();
 
-    return $stmt->rowCount() > 0;
-} //fim usaritem
+    if ($stmt->rowCount() > 0) {
 
-   function setUsu($idsu) {
+        $this->quantidade = (int)$this->quantidade - 1;
+
+        return true;
+    }
+
+    return false;
+
+} // fim usarItem
+
+
+
+    // Setters
+    public function setUsu($idsu) {
         $this->idsu = $idsu;
     }
 
-    function setItem($iditem) {
+    public function setItem($iditem) {
         $this->iditem = $iditem;
     }
 
-    function setQuan($quantidade) {
+    public function setQuan($quantidade) {
         $this->quantidade = $quantidade;
     }
 
-    function getUsu() {
+
+    // Getters
+    public function getUsu() {
         return $this->idsu;
     }
 
-    function getItem() {
+    public function getItem() {
         return $this->iditem;
     }
 
-    function getQuant() {
+    public function getQuant() {
         return $this->quantidade;
     }
 
-}
-?>
+} ?>

@@ -1,4 +1,5 @@
 <?php
+
 class LogBatalha
 {
     private $idlog;
@@ -8,7 +9,7 @@ class LogBatalha
     private $acao;
     private $dano;
     private $itid;
-    private $dataHora;
+
 
     function __construct($idBa, $idsu, $rodada, $acao, $dano, $itid = null)
     {
@@ -20,98 +21,98 @@ class LogBatalha
         $this->itid = $itid;
     }
 
+
+    // SALVAR REGISTRO DA BATALHA
     public function salvarLog($pdo)
-{
-    $sql = "INSERT INTO logbatalhas
-            (idBa, idsu, rodada, acao, dano, itid)
-            VALUES
-            (:idBa, :idsu, :rodada, :acao, :dano, :itid)";
+    {
+        $sql = "INSERT INTO logbatalhas
+                (idBa, idsu, rodada, acao, dano, itid)
+                VALUES
+                (:idBa, :idsu, :rodada, :acao, :dano, :itid)";
 
-    $stmt = $pdo->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
-    $stmt->execute([
-        ':idBa' => $this->idBa,
-        ':idsu' => $this->idsu,
-        ':rodada' => $this->rodada,
-        ':acao' => $this->acao,
-        ':dano' => $this->dano,
-        ':itid' => $this->itid
-    ]);
+        $stmt->execute([
+            ':idBa' => $this->idBa,
+            ':idsu' => $this->idsu,
+            ':rodada' => $this->rodada,
+            ':acao' => $this->acao,
+            ':dano' => $this->dano,
+            ':itid' => $this->itid
+        ]);
 
-    $this->idlog = $pdo->lastInsertId();
-}
+        // Recupera o ID gerado pelo banco
+        $this->idlog = $pdo->lastInsertId();
 
-    public function setIdlog($idlog)
-{
-    $this->idlog = $idlog;
-}
-public function setIdBa($idBa)
-{
-    $this->idBa = $idBa;
-}
+        return $this->idlog;
+    }
 
-public function setIdsu($idsu)
-{
-    $this->idsu = $idsu;
-}
 
-public function setRodada($rodada)
-{
-    $this->rodada = $rodada;
-}
+    // SETTERS
+    public function setIdBa($idBa)
+    {
+        $this->idBa = $idBa;
+    }
 
-public function setAcao($acao)
-{
-    $this->acao = $acao;
-}
+    public function setIdsu($idsu)
+    {
+        $this->idsu = $idsu;
+    }
 
-public function setDano($dano)
-{
-    $this->dano = $dano;
-}
+    public function setRodada($rodada)
+    {
+        $this->rodada = $rodada;
+    }
 
-public function setItid($itid)
-{
-    $this->itid = $itid;
-}
+    public function setAcao($acao)
+    {
+        $this->acao = $acao;
+    }
 
-public function setDataHora($dataHora)
-{
-    $this->dataHora = $dataHora;
-}
+    public function setDano($dano)
+    {
+        $this->dano = $dano;
+    }
+
+    public function setItid($itid)
+    {
+        $this->itid = $itid;
+    }
+
+
+    // GETTERS
     public function getIdlog()
-{
-    return $this->idlog;
-}
+    {
+        return $this->idlog;
+    }
 
-public function getIdBa()
-{
-    return $this->idBa;
-}
+    public function getIdBa()
+    {
+        return $this->idBa;
+    }
 
-public function getIdsu()
-{
-    return $this->idsu;
-}
+    public function getIdsu()
+    {
+        return $this->idsu;
+    }
 
-public function getRodada()
-{
-    return $this->rodada;
-}
+    public function getRodada()
+    {
+        return $this->rodada;
+    }
 
-public function getAcao()
-{
-    return $this->acao;
-}
+    public function getAcao()
+    {
+        return $this->acao;
+    }
 
-public function getDano()
-{
-    return $this->dano;
-}
+    public function getDano()
+    {
+        return $this->dano;
+    }
 
-public function getItid()
-{
-    return $this->itid;
-}
-}
-?>
+    public function getItid()
+    {
+        return $this->itid;
+    }
+} ?>
