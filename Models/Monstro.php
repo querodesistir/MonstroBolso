@@ -12,8 +12,17 @@ class Monstro
     private $danoEspecial;
 
     private $veloz;
-    private $nodeck;
-    function __construct($nome,$imagem, $dano, $hp, $ahp, $def, $prio, $danoEspecial,$veloz, $nodeck)
+   function __construct( //dica ia, temporario
+    $nome = '',
+    $imagem = null,
+    $dano = null,
+    $hp = null,
+    $ahp = null,
+    $def = null,
+    $prio = null,
+    $danoEspecial = null,
+    $veloz = null
+)
     {
         $this->nome = $nome;
         $this->imagem = $imagem;
@@ -24,7 +33,6 @@ class Monstro
         $this->prio = $prio;
         $this->danoEspecial = $danoEspecial;
         $this ->veloz = $veloz;
-        $this->nodeck = $nodeck;
     }
 
     function buscarMonstro()
@@ -40,68 +48,60 @@ class Monstro
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    function ListarMonstroPmontarDeck()
-    {
-        $con = new conexao();
-        $pdo = $con->pdo;
+  
+function ListarMonstroForadoDeck($ideck, $idsu)
+{
+    $con = new conexao();
+    $pdo = $con->pdo;
 
-        $sql = "SELECT nome,imagem,dano,hp, ahp, def, danoEspecial, veloz FROM Monstro where nodeck = false
-    order by dano desc";
+    $sql = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
+                   m.ahp, m.def, m.prio, m.danoEspecial, m.veloz
+            FROM monstro m
+            INNER JOIN deck d
+                ON d.ideck = :ideck
+                AND d.idsu = :idsu
+                AND d.descartado = 0
+            WHERE (d.idm1 IS NULL OR d.idm1 <> m.id)
+            AND (d.idm2 IS NULL OR d.idm2 <> m.id)
+            AND (d.idm3 IS NULL OR d.idm3 <> m.id)
+            ORDER BY m.dano DESC";
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
+    $stmt = $pdo->prepare($sql);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    function MonstrosnoDeck()
-    {
-        $con = new conexao();
-        $pdo = $con->pdo;
+    $stmt->execute([
+        ':ideck' => $ideck,
+        ':idsu' => $idsu
+    ]);
 
-      $sql = "SELECT id, nome, imagem, dano, hp, ahp, def, prio, danoEspecial, veloz
-      FROM Monstro
-      WHERE nodeck = true";
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
+function MonstrosnoDeck($ideck, $idsu)
+{
+    $con = new conexao();
+    $pdo = $con->pdo;
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    function AddaoDeck($id)
-    {
-        try {
-            $con = new conexao();
-            $pdo = $con->pdo;
-            $sql = "SELECT COUNT(*) FROM monstro WHERE nodeck = true";
+    $sql = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
+                   m.ahp, m.def, m.prio, m.danoEspecial, m.veloz
+            FROM deck d
+            INNER JOIN monstro m
+                ON (m.id = d.idm1
+                OR m.id = d.idm2
+                OR m.id = d.idm3)
+            WHERE d.ideck = :ideck
+            AND d.idsu = :idsu
+            AND d.descartado = 0
+            ORDER BY FIELD(m.id, d.idm1, d.idm2, d.idm3)";
 
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute();
+    $stmt = $pdo->prepare($sql);
 
-            $total = $stmt->fetchColumn();
+    $stmt->execute([
+        ':ideck' => $ideck,
+        ':idsu' => $idsu
+    ]);
 
-            if ($total < 3) {
-                $sql = "UPDATE monstro SET nodeck = true  WHERE id = :id";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ':id' => $id
-                ]);
-            }
-        } catch (PDOException $e) {
-            echo "Tire um monstro do deck para por outro" . $e->getMessage();
-        }
-    }
-
-    function TiradoDeck($id)
-    {
-        $con = new conexao();
-        $pdo = $con->pdo;
-
-        $sql = "UPDATE monstro SET nodeck = false where id = :id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':id' => $id
-        ]);
-    }
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     function setId($id)
     {
@@ -133,9 +133,6 @@ class Monstro
     }
     function setVeloz($veloz){
         $this->veloz = $veloz;
-    }
-    function setNodeck($nodeck){
-        $this->nodeck = $nodeck;
     }
 
     function getId()
@@ -169,14 +166,14 @@ class Monstro
     function getVeloz(){
         return $this->veloz;
     }
-}
- function getNodeck(){
-    return $this->nodeck;
-}
- function getPrio(){
+function getPrio()
+{
     return $this->prio;
 }
-function getDanoEspecial(){
+
+function getDanoEspecial()
+{
     return $this->danoEspecial;
 }
-?>
+
+} ?>

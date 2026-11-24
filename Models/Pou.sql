@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS monstro (
     danoEspecial INT,
     tipid INT NOT NULL,
     veloz int,
-    nodeck BOOLEAN,
 
     FOREIGN KEY (tipid) REFERENCES tipo(tipid)
 );
@@ -77,3 +76,5 @@ CREATE TABLE IF NOT EXISTS logbatalhas (
     FOREIGN KEY (idBa) REFERENCES batalha(idBa),
     FOREIGN KEY (itid) REFERENCES itens(itid)
 );
+ALTER TABLE deck
+ADD COLUMN descartado TINYINT(1) NOT NULL DEFAULT 0;

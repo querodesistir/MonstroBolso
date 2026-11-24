@@ -258,26 +258,56 @@ let arena = document.getElementById('arena');
 let log = document.getElementById('log');
 let comandos = document.getElementById('comandos');
 
+let nomeCenario = "";
+let imagemUrl = "";
+let bonusHabitat = 0;
 
-/* monstros: img = nome do arquivo dentro da pasta imagens */
-let monstros = [
-  { nome: 'Flamigato', img: 'flamigato',  tipo: 'fogo',     emoji: '🦊', hp: 78, atk: 16, def:  9, inicial: true, frase: 'Aquece tudo que encosta', golpe: 'Garra Flamejante', poder: 21 },
-  { nome: 'Aquatopo',  img: 'aquatopo',   tipo: 'agua',     emoji: '🐸', hp: 85, atk: 13, def: 12, inicial: true, frase: 'Calmo, mas nunca desiste', golpe: 'Jato de Lago',     poder: 19 },
-  { nome: 'Folhaco',   img: 'folhaco',    tipo: 'planta',   emoji: '🌱', hp: 82, atk: 14, def: 11, inicial: true, frase: 'Cresce mais que todo mundo', golpe: 'Chicote Trevo',    poder: 18 },
-  { nome: 'Vulcabra',  img: 'vulcabra',   tipo: 'fogo',     emoji: '🦇', hp: 74, atk: 17, def:  8, golpe: 'Asas de Brasa',    poder: 22 },
-  { nome: 'Mareman',   img: 'mareman',    tipo: 'agua',     emoji: '🐬', hp: 80, atk: 15, def: 10, golpe: 'Onda Marina',      poder: 20 },
-  { nome: 'Cactopun',  img: 'cactopun',   tipo: 'planta',   emoji: '🌵', hp: 76, atk: 15, def: 12, golpe: 'Espinho Buena',    poder: 20 },
-  { nome: 'Zapelé',    img: 'zapele',     tipo: 'eletrico', emoji: '🐿️', hp: 76, atk: 16, def:  9, golpe: 'Rabo de Trovão',   poder: 21 },
-  { nome: 'Voltaruga', img: 'voltaruga',  tipo: 'eletrico', emoji: '🐢', hp: 88, atk: 12, def: 13, golpe: 'Casco Chocante',   poder: 18 },
-  { nome: 'Rochambo',  img: 'rochambo',   tipo: 'pedra',    emoji: '🦍', hp: 84, atk: 15, def: 12, golpe: 'Punho Rochoso',    poder: 20 },
-  { nome: 'Granito',   img: 'granito',    tipo: 'pedra',    emoji: '🗿', hp: 92, atk: 11, def: 15, golpe: 'Avalanche',        poder: 17 },
-  { nome: 'Cristalino',img: 'cristalino', tipo: 'gelo',     emoji: '🐧', hp: 80, atk: 14, def: 11, golpe: 'Sopro Polar',      poder: 19 },
-  { nome: 'Nevasca',   img: 'nevasca',    tipo: 'gelo',     emoji: '❄️', hp: 78, atk: 15, def: 10, golpe: 'Tempestade Branca',poder: 21 },
-  { nome: 'Umbrino',   img: 'umbrino',    tipo: 'sombra',   emoji: '👻', hp: 74, atk: 17, def:  8, golpe: 'Toque Espectral',  poder: 21 },
-  { nome: 'Noturnix',  img: 'noturnix',   tipo: 'sombra',   emoji: '🦉', hp: 76, atk: 16, def:  9, golpe: 'Olhar da Noite',   poder: 20 },
-  { nome: 'Draguino',  img: 'draguino',   tipo: 'dragao',   emoji: '🐉', hp: 86, atk: 16, def: 11, golpe: 'Fúria Ancestral',  poder: 22 },
-];
+function sortearHabitat() {
+    let ns = Math.floor(Math.random() * 6) + 1;
 
+    switch (ns) {
+        case 1:
+            nomeCenario = "bosque";
+            imagemUrl = "imagem/bosque.png";
+            bonusHabitat = 10;
+            break;
+
+        case 2:
+            nomeCenario = "desfiladeiro";
+            imagemUrl = "imagem/desfiladeiro.png";
+            bonusHabitat = 15;
+            break;
+
+        case 3:
+            nomeCenario = "pantano";
+            imagemUrl = "imagem/pantano.png";
+            bonusHabitat = 20;
+            break;
+
+        case 4:
+            nomeCenario = "estradapedra";
+            imagemUrl = "imagem/estradapedra.png";
+            bonusHabitat = 5;
+            break;
+
+        case 5:
+            nomeCenario = "praianoturna";
+            imagemUrl = "imagem/praianoturna.png";
+            bonusHabitat = 5;
+            break;
+
+        default:
+            nomeCenario = "arena Padrão";
+            imagemUrl = "imagem/padrao.png";
+            bonusHabitat = 0;
+            break;
+    }
+
+    arena.style.backgroundImage = `url('${imagemUrl}')`;
+    arena.style.backgroundSize = "cover";
+    arena.style.backgroundPosition = "center";
+    arena.style.backgroundRepeat = "no-repeat";
+}
 
 /* quem leva mais dano (x1.5) e quem leva menos (x0.6) */
 let eficaz = {
@@ -351,16 +381,16 @@ function montarSprite(lugar, lado) {
 
 function criarLado(m, nivel) {
   let esc = 1 + 0.05 * (nivel - 5);
-  let lado = {
+ let lado = {
     nome: m.nome, emoji: m.emoji, tipo: m.tipo, nivel: nivel,
     hpMax: Math.round(m.hp * esc), hp: Math.round(m.hp * esc),
     atk: m.atk + (nivel - 5), def: m.def + Math.floor((nivel - 5) / 2),
     golpes: [
-      { n: m.golpe, p: m.poder, t: m.tipo },
-      { n: 'Investida', p: 14, t: 'neutro' }
+        { n: m.golpe, p: m.poder, t: m.tipo },
+        { n: 'Investida', p: 14, t: 'neutro' }
     ],
     pocao: 2, defendendo: false
-  };
+};
   return lado;
 }
 
@@ -468,7 +498,7 @@ function mostrarBatalha() {
   jogador.pocao = 2;
   inimigo.pocao = 1;
   atualizarPocao();
-  aplicarFundo(inimigo.tipo);
+  sortearHabitat();
   atualizarHUD();
   escreverLog('Um ' + inimigo.nome + ' selvagem apareceu!');
   minhaVez = false;
@@ -731,7 +761,7 @@ montarEscolha();
 poeFundoEscolha();
 
 
-carregarArenaDireto(); 
+//carregarArenaDireto(); --> perguntar
 
 
 </script>
