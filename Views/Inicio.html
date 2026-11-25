@@ -72,16 +72,6 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
     
 </head>
 <body>
-    <script>
-        fetch('Usulogado.php')
-            .then(resposta => resposta.json())
-            .then(dados => {
-                if (dados.logado === false) {
-                    window.location.href = 'login.html';
-                }
-            })
-            .catch(erro => console.error("Erro na comunicação com o servidor:", erro));
-    </script>
 
    <nav class="menu">
         <ul>
@@ -93,6 +83,30 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
             <li><a href="../Views/centrocura.html">Centro de Cura</a></li>
         </ul>
     </nav>
+<script>
+    async function iniciarJogo() {
 
+        try {
+
+            const resposta = await fetch("../Controllers/criarSessao.php", {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store"
+            });
+
+            if (!resposta.ok) {
+                throw new Error("Não foi possível iniciar a sessão.");
+            }
+
+        } catch (erro) {
+
+            console.error("Erro ao iniciar o jogo:", erro);
+
+        }
+
+    }
+
+    iniciarJogo();
+</script>
 </body>
 </html>
