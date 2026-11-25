@@ -1,6 +1,4 @@
-
 <?php
-
 session_start();
 
 require_once __DIR__ . "/../Models/conexao.php";
@@ -10,14 +8,14 @@ header('Content-Type: application/json; charset=utf-8');
 
 try {
 
-    //Verifica se existe usuário conectado
+    // Verifica se existe um jogador identificado na sessão
     if (!isset($_SESSION['idsu'])) {
 
         http_response_code(401);
 
         echo json_encode([
             'ok' => false,
-            'erro' => 'Usuário não está conectado.'
+            'erro' => 'Jogador não identificado. Inicie ou continue sua sessão.'
         ], JSON_UNESCAPED_UNICODE);
 
         exit;
@@ -38,9 +36,18 @@ try {
         null,
         null
     );
+
     $acao = $_GET['acao'] ?? 'listar';
 
-    if (!in_array($acao, ['listar', 'adicionar', 'retirar', 'renovar'], true)) {
+    // Verifica se a ação solicitada é válida
+   if (!in_array($acao, [
+    'listar',
+    'adicionar',
+    'retirar',
+    'renovar',
+    'comprar',
+    'usar'
+], true)) {
 
         http_response_code(400);
 
@@ -51,7 +58,49 @@ try {
 
         exit;
     }
+// Ações relacionadas aos itens
+if ($acao === 'comprar' || $acao === 'usar') {
 
+    $itid = isset($_POST['itid']) ? (int) $_POST['itid'] : 0;
+
+    if ($itid <= 0) {
+        http_response_code(400);
+        echo json_encode([
+            'ok' => false,
+            'erro' => 'Item inválido.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $itemModel = new Item_su($idsu, $itid, 0);
+
+    if ($acao === 'comprar') {
+        $resultado = $itemModel->comprarItem();
+    } else {
+        $resultado = $itemModel->usarItem();
+    }
+
+    if (!$resultado) {
+        http_response_code(400);
+        echo json_encode([
+            'ok' => false,
+            'erro' => $acao === 'comprar'
+                ? 'Não foi possível comprar o item. Verifique seu saldo.'
+                : 'Você não possui esse item no inventário.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    echo json_encode([
+        'ok' => true,
+        'mensagem' => $acao === 'comprar'
+            ? 'Item comprado com sucesso!'
+            : 'Item utilizado com sucesso!',
+        'itens' => Item_su::ListarItensUsu($idsu)
+    ], JSON_UNESCAPED_UNICODE);
+
+    exit;
+}
     if ($acao === 'renovar') {
 
         $resultado = $deckModel->renovarDeck($idsu);
@@ -116,9 +165,8 @@ try {
 
                 exit;
             }
-        }
 
-        elseif ($acao === 'retirar') {
+        } elseif ($acao === 'retirar') {
 
             $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
@@ -150,8 +198,7 @@ try {
         }
     }
 
-
-    //Busca novamente o deck ativo
+    // Busca novamente o deck ativo
     $deckAtual = $deckModel->buscarDeckAtivo($idsu);
 
     if (!$deckAtual) {
@@ -168,13 +215,13 @@ try {
 
     $ideck = (int) $deckAtual['ideck'];
 
-
-    // 10. Lista os monstros que estão no deck
+    // Busca os monstros que estão no deck
     $MonstrosDeck = $monstroModel->MonstrosnoDeck(
         $ideck,
         $idsu
     );
 
+    // Busca os monstros disponíveis para adicionar
     $listaMonstros = $monstroModel->ListarMonstroForadoDeck(
         $ideck,
         $idsu
@@ -187,7 +234,6 @@ try {
         'disponiveis' => $listaMonstros
     ], JSON_UNESCAPED_UNICODE);
 
-
 } catch (Throwable $e) {
 
     http_response_code(500);
@@ -199,5 +245,4 @@ try {
         'erro' => 'Erro ao processar a solicitação.'
     ], JSON_UNESCAPED_UNICODE);
 }
-
 ?>

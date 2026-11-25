@@ -1,8 +1,8 @@
 
 <?php
 
-class Monstro
-{
+class Monstro {
+
     private $id;
     private $nome;
     private $imagem;
@@ -12,20 +12,23 @@ class Monstro
     private $def;
     private $prio;
     private $danoEspecial;
+    private $tipid;
     private $veloz;
 
-
-    function __construct(
-        $nome,
-        $imagem,
-        $dano,
-        $hp,
-        $ahp,
-        $def,
-        $prio,
-        $danoEspecial,
-        $veloz
+    public function __construct(
+        $nome = '',
+        $imagem = null,
+        $dano = null,
+        $tipid = null,
+        $hp = 100,
+        $ahp = null,
+        $def = null,
+        $prio = null,
+        $danoEspecial = null,
+        $veloz = null,
+        $id = null
     ) {
+        $this->id = $id;
         $this->nome = $nome;
         $this->imagem = $imagem;
         $this->dano = $dano;
@@ -34,11 +37,13 @@ class Monstro
         $this->def = $def;
         $this->prio = $prio;
         $this->danoEspecial = $danoEspecial;
+        $this->tipid = $tipid;
         $this->veloz = $veloz;
     }
 
-    function buscarMonstro()
-    {
+    // Pesquisa um monstro pelo nome
+    public function buscarMonstro() {
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -58,8 +63,26 @@ class Monstro
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    function ListarMonstroForadoDeck($ideck, $idsu)
-    {
+
+    // Lista todos os monstros cadastrados
+    public function ListarMonstros() {
+
+        $con = new conexao();
+        $pdo = $con->pdo;
+
+        $sql = "SELECT *
+                FROM monstro
+                ORDER BY nome";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Lista os monstros que não estão no deck
+    public function ListarMonstroForadoDeck($ideck, $idsu) {
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -85,8 +108,9 @@ class Monstro
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    function MonstrosnoDeck($ideck, $idsu)
-    {
+    // Lista os monstros que estão no deck
+    public function MonstrosnoDeck($ideck, $idsu) {
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -114,98 +138,94 @@ class Monstro
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
-    // SETTERS
-    function setId($id)
-    {
-        $this->id = $id;
-    }
-
-    function setNome($nome)
-    {
-        $this->nome = $nome;
-    }
-
-    function setDano($dano)
-    {
-        $this->dano = $dano;
-    }
-
-    function setHp($hp)
-    {
-        $this->hp = $hp;
-    }
-
-    function setAhp($ahp)
-    {
-        $this->ahp = $ahp;
-    }
-
-    function setDef($def)
-    {
-        $this->def = $def;
-    }
-
-    function setImage($imagem)
-    {
-        $this->imagem = $imagem;
-    }
-
-    function setVeloz($veloz)
-    {
-        $this->veloz = $veloz;
-    }
-
-
-    // GETTERS
-    function getId()
-    {
+    // Getters
+    public function getId() {
         return $this->id;
     }
 
-    function getNome()
-    {
+    public function getNome() {
         return $this->nome;
     }
 
-    function getDano()
-    {
-        return $this->dano;
-    }
-
-    function getHp()
-    {
-        return $this->hp;
-    }
-
-    function getAhp()
-    {
-        return $this->ahp;
-    }
-
-    function getDef()
-    {
-        return $this->def;
-    }
-
-    function getImage()
-    {
+    public function getImagem() {
         return $this->imagem;
     }
 
-    function getVeloz()
-    {
-        return $this->veloz;
+    public function getDano() {
+        return $this->dano;
     }
 
-    function getPrio()
-    {
+    public function getHp() {
+        return $this->hp;
+    }
+
+    public function getAhp() {
+        return $this->ahp;
+    }
+
+    public function getDef() {
+        return $this->def;
+    }
+
+    public function getPrio() {
         return $this->prio;
     }
 
-    function getDanoEspecial()
-    {
+    public function getDanoEspecial() {
         return $this->danoEspecial;
+    }
+
+    public function getTipid() {
+        return $this->tipid;
+    }
+
+    public function getVeloz() {
+        return $this->veloz;
+    }
+
+    // Setters
+    public function setId($id) {
+        $this->id = $id;
+    }
+
+    public function setNome($nome) {
+        $this->nome = $nome;
+    }
+
+    public function setImagem($imagem) {
+        $this->imagem = $imagem;
+    }
+
+    public function setDano($dano) {
+        $this->dano = $dano;
+    }
+
+    public function setHp($hp) {
+        $this->hp = $hp;
+    }
+
+    public function setAhp($ahp) {
+        $this->ahp = $ahp;
+    }
+
+    public function setDef($def) {
+        $this->def = $def;
+    }
+
+    public function setPrio($prio) {
+        $this->prio = $prio;
+    }
+
+    public function setDanoEspecial($danoEspecial) {
+        $this->danoEspecial = $danoEspecial;
+    }
+
+    public function setTipid($tipid) {
+        $this->tipid = $tipid;
+    }
+
+    public function setVeloz($veloz) {
+        $this->veloz = $veloz;
     }
 }
 

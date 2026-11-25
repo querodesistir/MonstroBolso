@@ -1,195 +1,159 @@
 <?php
+
 class Usuario {
     private $idsu;
-    private $mail;
-    private $senha;
     private $apelido;
     private $dindin;
     private $nivel;
 
-    function __construct($mail, $senha, $apelido = null, $dindin = 0, $nivel = 0) {
-        $this->mail = $mail;
-        $this->senha = $senha;
+    public function __construct($apelido = 'Jogador', $dindin = 0, $nivel = 0) {
         $this->apelido = $apelido;
         $this->dindin = $dindin;
         $this->nivel = $nivel;
     }
 
-    function cadaSu() {
+    // Reconhece um jogador pelo token
+    public function entrar($token) {
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "INSERT INTO usuario(mail, senha, apelido, dindin, nivel)
-                VALUES (:mail, :senha, :apelido, :dindin, :nivel)";
+        $tokenHash = hash('sha256', $token);
 
+        $sql = "SELECT * FROM usuario WHERE token_hash = :token_hash";
         $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':token_hash', $tokenHash);
+        $stmt->execute();
 
-        $dados[':mail'] = $this->mail;
-        $dados[':senha'] = password_hash($this->senha, PASSWORD_DEFAULT);
-        $dados[':apelido'] = $this->apelido;
-        $dados[':dindin'] = $this->dindin;
-        $dados[':nivel'] = $this->nivel;
+        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $stmt->execute($dados);
-
-        $this->idsu = $pdo->lastInsertId();
-
-        return true;
-    } // fim do cadastro
-
-    function Login() {
-        $con = new conexao();
-        $pdo = $con->pdo;
-
-        $sql = "SELECT idsu, mail, senha, apelido, nivel, dindin
-                FROM usuario
-                WHERE mail = :mail";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':mail' => $this->mail]);
-
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$usuario || !password_verify($this->senha, $usuario['senha'])) {
+        if (!$dados) {
             return false;
         }
 
-        $this->idsu = $usuario['idsu'];
-        $this->apelido = $usuario['apelido'];
-        $this->nivel = $usuario['nivel'];
-        $this->dindin = $usuario['dindin'];
+        $this->idsu = $dados['idsu'];
+        $this->apelido = $dados['apelido'];
+        $this->dindin = $dados['dindin'];
+        $this->nivel = $dados['nivel'];
 
         return true;
-    } // fim do login
-
-    public function desaida() {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
-        }
-
-        header("Location: login.html");
-        exit;
     }
 
-    function verPerfil() {
+    // Cria um novo jogador
+    public function criarUsuario($token) {
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT mail, apelido, nivel
+        $tokenHash = hash('sha256', $token);
+
+        $sql = "INSERT INTO usuario (token_hash, apelido, dindin, nivel)
+                VALUES (:token_hash, :apelido, :dindin, :nivel)";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':token_hash', $tokenHash);
+        $stmt->bindValue(':apelido', $this->apelido);
+        $stmt->bindValue(':dindin', $this->dindin);
+        $stmt->bindValue(':nivel', $this->nivel);
+
+        if ($stmt->execute()) {
+            $this->idsu = $pdo->lastInsertId();
+            return true;
+        }
+
+        return false;
+    }
+
+    // Consulta o perfil do jogador
+    public function VerPerfil() {
+        $con = new conexao();
+        $pdo = $con->pdo;
+
+        $sql = "SELECT idsu, apelido, dindin, nivel
                 FROM usuario
                 WHERE idsu = :idsu";
 
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([':idsu' => $this->idsu]);
+        $stmt->bindValue(':idsu', $this->idsu);
+        $stmt->execute();
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    } // fim de ler perfil
+        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    function EditPerfil() {
-        $con = new conexao();
-        $pdo = $con->pdo;
-
-        $sql = "UPDATE usuario
-     SET mail = :mail, apelido = :apelido WHERE idsu = :idsu";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            ':mail' => $this->mail,
-            ':apelido' => $this->apelido,
-            ':idsu' => $this->idsu
-        ]);
-    } //fim edita perfil
-
-    function mudaSenha($novaSenha) {
-        $con = new conexao();
-        $pdo = $con->pdo;
-
-        $sql = "UPDATE usuario
-                SET senha = :senha
-                WHERE idsu = :idsu";
-
-        $stmt = $pdo->prepare($sql);
-
-        return $stmt->execute([
-            ':senha' => password_hash($novaSenha, PASSWORD_DEFAULT),
-            ':idsu' => $this->idsu
-        ]);
-    } //fim mudasenha
-
-    function apagaConta() {
-        $con = new conexao();
-        $pdo = $con->pdo;
-        try {
-            $pdo->beginTransaction();
-            $sql = "DELETE FROM usuario WHERE idsu = :idsu";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                ':idsu' => $this->idsu
-            ]);
-            if ($stmt->rowCount() === 0) {
-                $pdo->rollBack();
-                return false;
-            }
-            $pdo->commit();
-            return true;
-        } catch (PDOException $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            throw $e;
+        if (!$dados) {
+            return false;
         }
-    } // fim de apagar conta
 
-    // SETTERS
-    function setMail($mail) {
-        $this->mail = $mail;
+        $this->apelido = $dados['apelido'];
+        $this->dindin = $dados['dindin'];
+        $this->nivel = $dados['nivel'];
+
+        return $dados;
     }
 
-    function setSen($senha) {
-        $this->senha = $senha;
-    }
+    // Edita o perfil do jogador
+    // Edita o perfil do jogador
+public function EditarPerfil($apelido) {
+    $con = new conexao();
+    $pdo = $con->pdo;
 
-    function setApelido($apelido) {
+    $sql = "UPDATE usuario
+            SET apelido = :apelido
+            WHERE idsu = :idsu";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':apelido', $apelido);
+    $stmt->bindValue(':idsu', $this->idsu);
+
+    $stmt->execute();
+
+    if ($stmt->rowCount() > 0) {
         $this->apelido = $apelido;
+        return true;
     }
 
-    function setNivel($nivel) {
-        $this->nivel = $nivel;
+    // Verifica se o jogador existe e já possui esse apelido
+    $sql = "SELECT idsu FROM usuario WHERE idsu = :idsu";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':idsu', $this->idsu);
+    $stmt->execute();
+
+    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        $this->apelido = $apelido;
+        return true;
     }
 
-    function setIdsu($idsu) {
-        $this->idsu = $idsu;
-    }
+    return false;
+}
 
-    function setDin($dindin) {
-        $this->dindin = $dindin;
-    }
-
-    // GETTERS
-    function getMail() {
-        return $this->mail;
-    }
-
-    function getSen() {
-        return $this->senha;
-    }
-
-    function getApelido() {
-        return $this->apelido;
-    }
-
-    function getNivel() {
-        return $this->nivel;
-    }
-
-    function getIdsu() {
+    public function getIdsu() {
         return $this->idsu;
     }
 
-    function getDin() {
+    public function getApelido() {
+        return $this->apelido;
+    }
+
+    public function getDindin() {
         return $this->dindin;
     }
 
-} // fim da classe Usuario
-?>
+    public function getNivel() {
+        return $this->nivel;
+    }
+
+    public function setIdsu($idsu) {
+        $this->idsu = $idsu;
+    }
+
+    public function setApelido($apelido) {
+        $this->apelido = $apelido;
+    }
+
+    public function setDindin($dindin) {
+        $this->dindin = $dindin;
+    }
+
+    public function setNivel($nivel) {
+        $this->nivel = $nivel;
+    }
+}

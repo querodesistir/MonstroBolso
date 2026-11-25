@@ -1,26 +1,27 @@
 <?php
-class Item_su {
+class Itemsu {
 
     private $idsu;
-    private $iditem;
+    private $itid;
     private $quantidade;
 
-    public function __construct($idsu, $iditem, $quantidade) {
+    public function __construct($idsu, $itid, $quantidade = 0) {
         $this->idsu = $idsu;
-        $this->iditem = $iditem;
+        $this->itid = $itid;
         $this->quantidade = $quantidade;
     }
 
-    // Lista os itens que pertencem ao usuário
+    // Lista os itens que pertencem ao jogador
     public static function ListarItensUsu($idsu) {
 
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT loja.iditem, loja.nome, item_su.quantidade
+        $sql = "SELECT itens.itid, itens.nomi, itens.nefeito,
+                       itens.preco, itens.descri, item_su.quantidade
                 FROM item_su
-                INNER JOIN loja
-                ON item_su.iditem = loja.iditem
+                INNER JOIN itens
+                ON item_su.itid = itens.itid
                 WHERE item_su.idsu = :idsu
                 AND item_su.quantidade > 0";
 
@@ -32,52 +33,49 @@ class Item_su {
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    } // fim ListarItensUsu
-
-public function usarItem() {
-
-    $con = new conexao();
-    $pdo = $con->pdo;
-
-    $sql = "UPDATE item_su
-            SET quantidade = quantidade - 1
-            WHERE idsu = :idsu
-            AND iditem = :iditem
-            AND quantidade > 0";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->bindValue(':idsu', $this->idsu, PDO::PARAM_INT);
-    $stmt->bindValue(':iditem', $this->iditem, PDO::PARAM_INT);
-
-    $stmt->execute();
-
-    if ($stmt->rowCount() > 0) {
-
-        $this->quantidade = (int)$this->quantidade - 1;
-
-        return true;
     }
 
-    return false;
+    // Utiliza um item do inventário
+    public function usarItem() {
 
-} // fim usarItem
+        $con = new conexao();
+        $pdo = $con->pdo;
 
+        $sql = "UPDATE item_su
+                SET quantidade = quantidade - 1
+                WHERE idsu = :idsu
+                AND itid = :itid
+                AND quantidade > 0";
 
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':idsu', $this->idsu, PDO::PARAM_INT);
+        $stmt->bindValue(':itid', $this->itid, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+
+            $this->quantidade = (int)$this->quantidade - 1;
+
+            return true;
+        }
+
+        return false;
+    }
 
     // Setters
     public function setUsu($idsu) {
         $this->idsu = $idsu;
     }
 
-    public function setItem($iditem) {
-        $this->iditem = $iditem;
+    public function setItem($itid) {
+        $this->itid = $itid;
     }
 
     public function setQuan($quantidade) {
         $this->quantidade = $quantidade;
     }
-
 
     // Getters
     public function getUsu() {
@@ -85,11 +83,12 @@ public function usarItem() {
     }
 
     public function getItem() {
-        return $this->iditem;
+        return $this->itid;
     }
 
     public function getQuant() {
         return $this->quantidade;
     }
 
-} ?>
+}
+?>

@@ -1,19 +1,308 @@
+
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lolja</title>
-    <style>
- body{
-    background-image: url("imagem/TelaSistema.png");
-    background-position: center;
-    background-repeat: no-repeat;
- }
+    <title>Loja - MonstroBolso</title>
 
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #dce9f5;
+            color: #17365d;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .secao {
+            background: white;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .itens {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .item {
+            border: 2px solid #b8cde0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            background: #f4f8fc;
+        }
+
+        .item h3 {
+            margin-top: 5px;
+            color: #174a7e;
+        }
+
+        .item p {
+            margin: 8px 0;
+        }
+
+        button {
+            background: #24649b;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #17436b;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        #mensagem {
+            text-align: center;
+            font-weight: bold;
+            margin: 15px;
+        }
+
+        .quantidade {
+            font-weight: bold;
+            color: #24649b;
+        }
     </style>
 </head>
+
 <body>
-    
+
+    <div class="container">
+
+        <h1>Loja do MonstroBolso</h1>
+
+        <div id="mensagem"></div>
+
+        <!-- LOJA -->
+        <section class="secao">
+
+            <h2>Loja de Itens</h2>
+
+            <div id="loja" class="itens">
+                Carregando itens...
+            </div>
+
+        </section>
+
+        <!-- INVENTÁRIO -->
+        <section class="secao">
+
+            <h2>Meu Inventário</h2>
+
+            <div id="inventario" class="itens">
+                Carregando inventário...
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        const urlItens = "../Controllers/ItensController.php";
+        const urlDeck = "../Controllers/DeckController.php";
+
+        const loja = document.getElementById("loja");
+        const inventario = document.getElementById("inventario");
+        const mensagem = document.getElementById("mensagem");
+
+
+        // Carrega os itens disponíveis na loja
+        async function carregarLoja() {
+
+            try {
+
+                const resposta = await fetch(urlItens + "?acao=listarLoja");
+                const dados = await resposta.json();
+
+                if (!dados.ok) {
+                    throw new Error(dados.erro || "Não foi possível carregar a loja.");
+                }
+
+                loja.innerHTML = "";
+
+                if (!dados.loja || dados.loja.length === 0) {
+                    loja.innerHTML = "<p>Nenhum item disponível.</p>";
+                    return;
+                }
+
+                dados.loja.forEach(item => {
+
+                    const div = document.createElement("div");
+                    div.className = "item";
+
+                    div.innerHTML = `
+                        <h3>${item.nomi}</h3>
+                        <p>${item.descri ?? "Sem descrição."}</p>
+                        <p>Efeito: ${item.nefeito}</p>
+                        <p>Preço: ${item.preco} Pokédollars</p>
+
+                        <button onclick="comprarItem(${item.itid})">
+                            Comprar
+                        </button>
+                    `;
+
+                    loja.appendChild(div);
+
+                });
+
+            } catch (erro) {
+
+                loja.innerHTML = "<p>Erro ao carregar a loja.</p>";
+                mostrarMensagem(erro.message);
+
+            }
+        }
+
+
+        // Carrega os itens que o jogador possui
+        async function carregarInventario() {
+
+            try {
+
+                const resposta = await fetch(urlItens + "?acao=listar");
+                const dados = await resposta.json();
+
+                if (!dados.ok) {
+                    throw new Error(dados.erro || "Não foi possível carregar o inventário.");
+                }
+
+                inventario.innerHTML = "";
+
+                if (!dados.itens || dados.itens.length === 0) {
+                    inventario.innerHTML = "<p>Seu inventário está vazio.</p>";
+                    return;
+                }
+
+                dados.itens.forEach(item => {
+
+                    const div = document.createElement("div");
+                    div.className = "item";
+
+                    div.innerHTML = `
+                        <h3>${item.nomi}</h3>
+                        <p>${item.descri ?? "Sem descrição."}</p>
+                        <p>Quantidade:
+                            <span class="quantidade">${item.quantidade}</span>
+                        </p>
+
+                        <button
+                            onclick="usarItem(${item.itid})"
+                            ${item.quantidade <= 0 ? "disabled" : ""}>
+                            Usar
+                        </button>
+                    `;
+
+                    inventario.appendChild(div);
+
+                });
+
+            } catch (erro) {
+
+                inventario.innerHTML = "<p>Erro ao carregar inventário.</p>";
+                mostrarMensagem(erro.message);
+
+            }
+        }
+
+
+        // Compra um item
+        async function comprarItem(itid) {
+
+            const confirmar = confirm("Deseja comprar este item?");
+
+            if (!confirmar) return;
+
+            await executarAcao("comprar", itid);
+
+        }
+
+
+        // Utiliza um item
+        async function usarItem(itid) {
+
+            const confirmar = confirm("Deseja utilizar este item?");
+
+            if (!confirmar) return;
+
+            await executarAcao("usar", itid);
+
+        }
+
+
+        // Envia a compra ou utilização ao DeckController
+        async function executarAcao(acao, itid) {
+
+            const dados = new FormData();
+            dados.append("itid", itid);
+
+            try {
+
+                const resposta = await fetch(
+                    `${urlDeck}?acao=${acao}`,
+                    {
+                        method: "POST",
+                        body: dados
+                    }
+                );
+
+                const resultado = await resposta.json();
+
+                if (!resultado.ok) {
+                    throw new Error(resultado.erro || "Não foi possível realizar a ação.");
+                }
+
+                mostrarMensagem(resultado.mensagem);
+
+                carregarLoja();
+                carregarInventario();
+
+            } catch (erro) {
+
+                mostrarMensagem(erro.message);
+
+            }
+        }
+
+
+        function mostrarMensagem(texto) {
+
+            mensagem.textContent = texto;
+
+        }
+
+
+        // Carrega as duas partes ao abrir a página
+        carregarLoja();
+        carregarInventario();
+
+    </script>
+
 </body>
 </html>

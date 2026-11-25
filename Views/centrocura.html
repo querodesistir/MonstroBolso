@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Cura - MonstroBolso</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #dce9f5;
+            color: #17365d;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .descricao {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .monstros {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .carta {
+            background: white;
+            border: 2px solid #b8cde0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .carta img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .hp {
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        .tempo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #24649b;
+            margin: 12px 0;
+        }
+
+        .status {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        button {
+            background: #24649b;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #17436b;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        #mensagem {
+            text-align: center;
+            font-weight: bold;
+            margin: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Centro de Cura</h1>
+
+        <p class="descricao">
+            Coloque seus monstros para descansar e recuperar toda a sua vida.
+            O processo de cura leva 10 minutos.
+        </p>
+
+        <div id="mensagem"></div>
+
+        <section id="monstros" class="monstros">
+            Carregando monstros...
+        </section>
+
+    </div>
+
+    <script>
+
+        const urlDeck = "../Controllers/DeckController.php";
+
+        // Chave compartilhada com o JavaScript da batalha.
+        const CHAVE_CURA = "monstrobolso_centro_cura";
+
+        // Dez minutos em milissegundos.
+        const TEMPO_CURA = 10 * 60 * 1000;
+
+        const areaMonstros = document.getElementById("monstros");
+        const mensagem = document.getElementById("mensagem");
+
+        let monstros = [];
+
+
+        // Lê os dados salvos no navegador.
+        function lerCuras() {
+
+            try {
+
+                return JSON.parse(localStorage.getItem(CHAVE_CURA)) || {};
+
+            } catch (erro) {
+
+                return {};
+
+            }
+
+        }
+
+
+        // Salva os dados no navegador.
+        function salvarCuras(curas) {
+
+            localStorage.setItem(CHAVE_CURA, JSON.stringify(curas));
+
+        }
+
+
+        // Consulta o HP e o tempo de recuperação de um monstro.
+        function obterEstado(monstro, curas) {
+
+            const id = String(monstro.id);
+
+            const hpMaximo = Number(monstro.hp);
+
+            const hpBanco = Number(monstro.ahp ?? hpMaximo);
+
+            const registro = curas[id] || {};
+
+            let ahp = Number(registro.ahp ?? hpBanco);
+
+            let fim = Number(registro.fim) || null;
+
+
+            // Verifica se os dez minutos terminaram.
+            if (fim && Date.now() >= fim) {
+
+                ahp = hpMaximo;
+                fim = null;
+
+                curas[id] = {
+                    ahp: hpMaximo,
+                    fim: null
+                };
+
+                salvarCuras(curas);
+
+            }
+
+            // Impede que o HP ultrapasse os limites.
+            ahp = Math.max(0, Math.min(hpMaximo, ahp));
+
+            return {
+                ahp: ahp,
+                hpMaximo: hpMaximo,
+                fim: fim,
+                emCura: fim !== null && Date.now() < fim
+            };
+
+        }
+
+
+        // Função que também será usada pela batalha.
+        // Retorna o estado atualizado do monstro.
+        function obterEstadoCura(monstro) {
+
+            const curas = lerCuras();
+
+            return obterEstado(monstro, curas);
+
+        }
+
+
+        // Salva o HP atualizado depois de uma ação da batalha.
+        function salvarHPMonstro(id, novoAhp) {
+
+            const monstro = monstros.find(
+                m => Number(m.id) === Number(id)
+            );
+
+            if (!monstro) {
+                return false;
+            }
+
+            const curas = lerCuras();
+
+            const estado = obterEstado(monstro, curas);
+
+            // Não permite alterar o HP enquanto o monstro está em cura.
+            if (estado.emCura) {
+                return false;
+            }
+
+            const novoHP = Math.max(
+                0,
+                Math.min(estado.hpMaximo, Number(novoAhp))
+            );
+
+            curas[String(id)] = {
+                ahp: novoHP,
+                fim: null
+            };
+
+            salvarCuras(curas);
+
+            return true;
+
+        }
+
+
+        // Inicia a recuperação de um monstro.
+        function iniciarCura(id) {
+
+            const monstro = monstros.find(
+                m => Number(m.id) === Number(id)
+            );
+
+            if (!monstro) {
+                return;
+            }
+
+            const curas = lerCuras();
+
+            const estado = obterEstado(monstro, curas);
+
+            if (estado.emCura || estado.ahp >= estado.hpMaximo) {
+                return;
+            }
+
+            const fim = Date.now() + TEMPO_CURA;
+
+            curas[String(id)] = {
+                ahp: estado.ahp,
+                fim: fim
+            };
+
+            salvarCuras(curas);
+
+            renderizarMonstros();
+
+        }
+
+
+        // Converte milissegundos em minutos e segundos.
+        function formatarTempo(milissegundos) {
+
+            const totalSegundos = Math.ceil(milissegundos / 1000);
+
+            const minutos = Math.floor(totalSegundos / 60);
+
+            const segundos = totalSegundos % 60;
+
+            return `${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
+
+        }
+
+
+        // Exibe os monstros e seus estados.
+        function renderizarMonstros() {
+
+            const curas = lerCuras();
+
+            areaMonstros.innerHTML = "";
+
+            if (monstros.length === 0) {
+
+                areaMonstros.textContent = "Seu deck não possui monstros.";
+
+                return;
+            }
+
+            monstros.forEach(monstro => {
+
+                const estado = obterEstado(monstro, curas);
+
+                const carta = document.createElement("div");
+                carta.className = "carta";
+
+                if (monstro.imagem) {
+
+                    const imagem = document.createElement("img");
+
+                    imagem.src = "imagem/" + monstro.imagem;
+                    imagem.alt = monstro.nome;
+
+                    carta.appendChild(imagem);
+
+                }
+
+                const nome = document.createElement("h3");
+                nome.textContent = monstro.nome;
+
+                const hp = document.createElement("p");
+                hp.className = "hp";
+                hp.textContent = `HP: ${estado.ahp} / ${estado.hpMaximo}`;
+
+                const status = document.createElement("p");
+                status.className = "status";
+
+                const tempo = document.createElement("p");
+                tempo.className = "tempo";
+
+                const botao = document.createElement("button");
+
+                if (estado.emCura) {
+
+                    status.textContent = "Em recuperação";
+
+                    tempo.textContent = formatarTempo(
+                        estado.fim - Date.now()
+                    );
+
+                    botao.textContent = "Carta indisponível";
+                    botao.disabled = true;
+
+                } else if (estado.ahp >= estado.hpMaximo) {
+
+                    status.textContent = "HP completo";
+
+                    tempo.textContent = "";
+
+                    botao.textContent = "Totalmente recuperado";
+                    botao.disabled = true;
+
+                } else {
+
+                    status.textContent = "Precisa de recuperação";
+
+                    tempo.textContent = "";
+
+                    botao.textContent = "Iniciar cura";
+
+                    botao.addEventListener("click", () => {
+                        iniciarCura(monstro.id);
+                    });
+
+                }
+
+                carta.appendChild(nome);
+                carta.appendChild(hp);
+                carta.appendChild(status);
+                carta.appendChild(tempo);
+                carta.appendChild(botao);
+
+                areaMonstros.appendChild(carta);
+
+            });
+
+        }
+
+
+        // Busca os monstros do deck.
+        async function carregarMonstros() {
+
+            try {
+
+                const resposta = await fetch(urlDeck + "?acao=listar");
+
+                const dados = await resposta.json();
+
+                if (!dados.ok) {
+                    throw new Error(
+                        dados.erro || "Não foi possível carregar o deck."
+                    );
+                }
+
+                monstros = dados.deck || [];
+
+                renderizarMonstros();
+
+            } catch (erro) {
+
+                areaMonstros.textContent = "Erro ao carregar os monstros.";
+
+                mensagem.textContent = erro.message;
+
+            }
+
+        }
+
+
+        // Atualiza a contagem regressiva a cada segundo.
+        setInterval(() => {
+
+            renderizarMonstros();
+
+        }, 1000);
+
+
+        // Carrega os monstros ao abrir a página.
+        carregarMonstros();
+
+    </script>
+
+</body>
+</html>

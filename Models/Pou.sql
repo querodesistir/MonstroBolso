@@ -2,8 +2,6 @@ USE pou;
 
 CREATE TABLE IF NOT EXISTS usuario (
     idsu INT PRIMARY KEY AUTO_INCREMENT,
-    mail VARCHAR(100) UNIQUE NOT NULL,
-    senha VARCHAR(255) NOT NULL,
     apelido VARCHAR(30) NOT NULL,
     dindin INT DEFAULT 0,
     nivel INT DEFAULT 0
@@ -45,6 +43,18 @@ CREATE TABLE IF NOT EXISTS deck (
     FOREIGN KEY (idm3) REFERENCES monstro(id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS deck_inimigo (
+    iddeck_inimigo INT AUTO_INCREMENT PRIMARY KEY,
+    idm1 INT NOT NULL,
+    idm2 INT NOT NULL,
+    idm3 INT NOT NULL,
+    titulo VARCHAR(30) NOT NULL,
+
+    FOREIGN KEY (idm1) REFERENCES monstro(id),
+    FOREIGN KEY (idm2) REFERENCES monstro(id),
+    FOREIGN KEY (idm3) REFERENCES monstro(id)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS itens (
     itid INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nomi VARCHAR(20) NOT NULL,
@@ -56,13 +66,14 @@ CREATE TABLE IF NOT EXISTS itens (
 CREATE TABLE IF NOT EXISTS batalha (
     idBa INT AUTO_INCREMENT PRIMARY KEY,
     ideck INT NOT NULL,
-    deckMau INT NOT NULL,
+    iddeck_inimigo INT NOT NULL,
     habitat VARCHAR(50) NOT NULL,
     vencedor VARCHAR(20),
     data DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (ideck) REFERENCES deck(ideck),
-    FOREIGN KEY (deckMau) REFERENCES deck(ideck)
+    FOREIGN KEY (iddeck_inimigo)
+        REFERENCES deck_inimigo(iddeck_inimigo)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS logbatalhas (
@@ -78,3 +89,6 @@ CREATE TABLE IF NOT EXISTS logbatalhas (
     FOREIGN KEY (idBa) REFERENCES batalha(idBa),
     FOREIGN KEY (itid) REFERENCES itens(itid)
 ) ENGINE=InnoDB;
+
+ALTER TABLE usuario
+ADD token_hash CHAR(64) NOT NULL UNIQUE;
