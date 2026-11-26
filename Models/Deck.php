@@ -1,152 +1,247 @@
-
 <?php
-
 class Deck {
+
     private $ideck;
     private $idsu;
-    private $idm1;
-    private $idm2;
-    private $idm3;
     private $titulo;
     private $descartado;
 
     public function __construct(
-        $idsu,
-        $idm1 = null,
-        $idm2 = null,
-        $idm3 = null,
+        $idsu = null,
         $titulo = 'FolhaX',
-        $descartado = 0
+        $descartado = 0,
+        $ideck = null
     ) {
-        $this->idsu = $idsu;
-        $this->idm1 = $idm1;
-        $this->idm2 = $idm2;
-        $this->idm3 = $idm3;
+        $this->idsu = $idsu !== null ? (int) $idsu : null;
         $this->titulo = $titulo;
-        $this->descartado = $descartado;
+        $this->descartado = (int) $descartado;
+        $this->ideck = $ideck !== null ? (int) $ideck : null;
     }
 
-    // Cadastra um novo deck
     public function cadasDeck() {
+
+        if (!$this->idsu) {
+            return false;
+        }
+
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "INSERT INTO deck
-                (idsu, idm1, idm2, idm3, titulo, descartado)
-                VALUES
-                (:idsu, :idm1, :idm2, :idm3, :titulo, :descartado)";
+        $sql = "INSERT INTO deck (
+                    idsu,
+                    idm1,
+                    idm2,
+                    idm3,
+                    titulo,
+                    descartado
+                ) VALUES (
+                    :idsu,
+                    NULL,
+                    NULL,
+                    NULL,
+                    :titulo,
+                    0
+                )";
 
         $stmt = $pdo->prepare($sql);
 
-        $stmt->bindValue(':idsu', $this->idsu);
-        $stmt->bindValue(':idm1', $this->idm1);
-        $stmt->bindValue(':idm2', $this->idm2);
-        $stmt->bindValue(':idm3', $this->idm3);
-        $stmt->bindValue(':titulo', $this->titulo);
-        $stmt->bindValue(':descartado', $this->descartado);
+        $stmt->execute([
+            ':idsu' => $this->idsu,
+            ':titulo' => $this->titulo
+        ]);
 
-        if ($stmt->execute()) {
-            $this->ideck = $pdo->lastInsertId();
-            return true;
-        }
+        $this->ideck = (int) $pdo->lastInsertId();
+        $this->descartado = 0;
 
-        return false;
+        return $this->ideck > 0;
     }
 
-    // Adiciona um monstro ao primeiro espaço disponível
-    public function Addeck($idmonstro) {
+    public function buscarDeckAtivo() {
+
+        if (!$this->idsu) {
+            return false;
+        }
+
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT idm1, idm2, idm3
+        $sql = "SELECT ideck, idsu, titulo, descartado
+                FROM deck
+                WHERE idsu = :idsu
+                AND descartado = 0
+                ORDER BY ideck DESC
+                LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            ':idsu' => $this->idsu
+        ]);
+
+        $deck = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$deck) {
+            return false;
+        }
+
+        $this->ideck = (int) $deck['ideck'];
+        $this->idsu = (int) $deck['idsu'];
+        $this->titulo = $deck['titulo'];
+        $this->descartado = (int) $deck['descartado'];
+
+        return $this->ideck;
+    }
+
+    public function renovarDeck() {
+
+        if (!$this->idsu) {
+            return false;
+        }
+
+        $con = new conexao();
+        $pdo = $con->pdo;
+
+        try {
+
+            $pdo->beginTransaction();
+
+            $sqlBloquear = "SELECT ideck
+                            FROM deck
+                            WHERE idsu = :idsu
+                            AND descartado = 0
+                            FOR UPDATE";
+
+            $stmtBloquear = $pdo->prepare($sqlBloquear);
+
+            $stmtBloquear->execute([
+                ':idsu' => $this->idsu
+            ]);
+
+            $stmtBloquear->fetchAll(PDO::FETCH_COLUMN);
+
+            $sqlArquivar = "UPDATE deck
+                            SET descartado = 1
+                            WHERE idsu = :idsu
+                            AND descartado = 0";
+
+            $stmtArquivar = $pdo->prepare($sqlArquivar);
+
+            $stmtArquivar->execute([
+                ':idsu' => $this->idsu
+            ]);
+
+            $sqlCriar = "INSERT INTO deck (
+                            idsu,
+                            idm1,
+                            idm2,
+                            idm3,
+                            titulo,
+                            descartado
+                         ) VALUES (
+                            :idsu,
+                            NULL,
+                            NULL,
+                            NULL,
+                            'FolhaX',
+                            0
+                         )";
+
+            $stmtCriar = $pdo->prepare($sqlCriar);
+
+            $stmtCriar->execute([
+                ':idsu' => $this->idsu
+            ]);
+
+            $this->ideck = (int) $pdo->lastInsertId();
+            $this->titulo = 'FolhaX';
+            $this->descartado = 0;
+
+            $pdo->commit();
+
+            return $this->ideck;
+
+        } catch (Throwable $e) {
+
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $e;
+        }
+    }
+
+    public function VerDeck() {
+
+        if (!$this->ideck || !$this->idsu) {
+            return false;
+        }
+
+        $con = new conexao();
+        $pdo = $con->pdo;
+
+        $sql = "SELECT ideck, idsu, titulo, descartado
                 FROM deck
                 WHERE ideck = :ideck
                 AND idsu = :idsu
-                AND descartado = 0";
+                LIMIT 1";
 
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':ideck', $this->ideck);
-        $stmt->bindValue(':idsu', $this->idsu);
-        $stmt->execute();
 
-        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute([
+            ':ideck' => $this->ideck,
+            ':idsu' => $this->idsu
+        ]);
 
-        if (!$dados) {
+        $deck = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$deck) {
             return false;
         }
 
-        if ($dados['idm1'] === null) {
-            $campo = 'idm1';
-        } elseif ($dados['idm2'] === null) {
-            $campo = 'idm2';
-        } elseif ($dados['idm3'] === null) {
-            $campo = 'idm3';
-        } else {
-            return false;
-        }
+        $this->ideck = (int) $deck['ideck'];
+        $this->idsu = (int) $deck['idsu'];
+        $this->titulo = $deck['titulo'];
+        $this->descartado = (int) $deck['descartado'];
 
-        $sql = "UPDATE deck
-                SET $campo = :idmonstro
-                WHERE ideck = :ideck
-                AND idsu = :idsu";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':idmonstro', $idmonstro);
-        $stmt->bindValue(':ideck', $this->ideck);
-        $stmt->bindValue(':idsu', $this->idsu);
-
-        return $stmt->execute();
+        return true;
     }
 
-    // Consulta um deck específico
-    public function VerDeck() {
-        $con = new conexao();
-        $pdo = $con->pdo;
-
-        $sql = "SELECT *
-                FROM deck
-                WHERE ideck = :ideck
-                AND idsu = :idsu";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':ideck', $this->ideck);
-        $stmt->bindValue(':idsu', $this->idsu);
-        $stmt->execute();
-
-        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$dados) {
-            return false;
-        }
-
-        $this->idm1 = $dados['idm1'];
-        $this->idm2 = $dados['idm2'];
-        $this->idm3 = $dados['idm3'];
-        $this->titulo = $dados['titulo'];
-        $this->descartado = $dados['descartado'];
-
-        return $dados;
-    }
-
-    // Lista os decks de um jogador
     public function ListarDecks() {
+
+        if (!$this->idsu) {
+            return [];
+        }
+
         $con = new conexao();
         $pdo = $con->pdo;
 
-        $sql = "SELECT *
+        $sql = "SELECT ideck, idsu, titulo, descartado
                 FROM deck
                 WHERE idsu = :idsu
-                AND descartado = 0";
+                AND descartado = 0
+                ORDER BY ideck DESC";
 
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':idsu', $this->idsu);
-        $stmt->execute();
+
+        $stmt->execute([
+            ':idsu' => $this->idsu
+        ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Altera o título do deck
     public function EditarDeck($titulo) {
+
+        if (!$this->ideck || !$this->idsu) {
+            return false;
+        }
+
+        $titulo = trim($titulo);
+
+        if ($titulo === '') {
+            return false;
+        }
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -157,11 +252,14 @@ class Deck {
                 AND descartado = 0";
 
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':titulo', $titulo);
-        $stmt->bindValue(':ideck', $this->ideck);
-        $stmt->bindValue(':idsu', $this->idsu);
 
-        if ($stmt->execute()) {
+        $stmt->execute([
+            ':titulo' => $titulo,
+            ':ideck' => $this->ideck,
+            ':idsu' => $this->idsu
+        ]);
+
+        if ($stmt->rowCount() > 0) {
             $this->titulo = $titulo;
             return true;
         }
@@ -169,21 +267,29 @@ class Deck {
         return false;
     }
 
-    // Descarta um deck sem excluí-lo do banco
     public function DescartarDeck() {
+
+        if (!$this->ideck || !$this->idsu) {
+            return false;
+        }
+
         $con = new conexao();
         $pdo = $con->pdo;
 
         $sql = "UPDATE deck
                 SET descartado = 1
                 WHERE ideck = :ideck
-                AND idsu = :idsu";
+                AND idsu = :idsu
+                AND descartado = 0";
 
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':ideck', $this->ideck);
-        $stmt->bindValue(':idsu', $this->idsu);
 
-        if ($stmt->execute()) {
+        $stmt->execute([
+            ':ideck' => $this->ideck,
+            ':idsu' => $this->idsu
+        ]);
+
+        if ($stmt->rowCount() > 0) {
             $this->descartado = 1;
             return true;
         }
@@ -191,123 +297,100 @@ class Deck {
         return false;
     }
 
-public function buscarDeckInimigoAleatorio() {
+    public function buscarDeckInimigoAleatorio() {
 
-    $con = new conexao();
-    $pdo = $con->pdo;
+        $con = new conexao();
+        $pdo = $con->pdo;
 
-    $sql = "SELECT iddeck_inimigo, idm1, idm2, idm3, titulo
-            FROM deck_inimigo
-            ORDER BY RAND()
-            LIMIT 1";
+        $sql = "SELECT iddeck_inimigo, idm1, idm2, idm3, titulo
+                FROM deck_inimigo
+                ORDER BY RAND()
+                LIMIT 1";
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
 
-    $deck = $stmt->fetch(PDO::FETCH_ASSOC);
+        $deck = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$deck) {
-        return false;
-    }
-
-    $sqlMonstros = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
-                           m.hp AS ahp, m.def, m.prio, m.danoEspecial,
-                           m.tipid, t.elemento, m.veloz
-                    FROM monstro m
-                    INNER JOIN tipo t
-                        ON t.tipid = m.tipid
-                    WHERE m.id IN (:idm1, :idm2, :idm3)";
-
-    $stmtMonstros = $pdo->prepare($sqlMonstros);
-
-    $stmtMonstros->execute([
-        ':idm1' => $deck['idm1'],
-        ':idm2' => $deck['idm2'],
-        ':idm3' => $deck['idm3']
-    ]);
-
-    $registros = $stmtMonstros->fetchAll(PDO::FETCH_ASSOC);
-
-    $monstrosPorId = [];
-
-    foreach ($registros as $registro) {
-        $monstrosPorId[(int) $registro['id']] = $registro;
-    }
-
-    $monstros = [];
-
-    foreach (['idm1', 'idm2', 'idm3'] as $campo) {
-        $idMonstro = (int) $deck[$campo];
-
-        if (!isset($monstrosPorId[$idMonstro])) {
+        if (!$deck) {
             return false;
         }
 
-        $monstros[] = $monstrosPorId[$idMonstro];
+        $sqlMonstros = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
+                               m.hp AS ahp, m.def, m.prio, m.danoEspecial,
+                               m.tipid, t.elemento, m.veloz
+                        FROM monstro m
+                        INNER JOIN tipo t
+                            ON t.tipid = m.tipid
+                        WHERE m.id IN (:idm1, :idm2, :idm3)";
+
+        $stmtMonstros = $pdo->prepare($sqlMonstros);
+
+        $stmtMonstros->execute([
+            ':idm1' => $deck['idm1'],
+            ':idm2' => $deck['idm2'],
+            ':idm3' => $deck['idm3']
+        ]);
+
+        $registros = $stmtMonstros->fetchAll(PDO::FETCH_ASSOC);
+
+        $monstrosPorId = [];
+
+        foreach ($registros as $registro) {
+            $monstrosPorId[(int) $registro['id']] = $registro;
+        }
+
+        $monstros = [];
+
+        foreach (['idm1', 'idm2', 'idm3'] as $campo) {
+
+            $idMonstro = (int) $deck[$campo];
+
+            if (!isset($monstrosPorId[$idMonstro])) {
+                return false;
+            }
+
+            $monstros[] = $monstrosPorId[$idMonstro];
+        }
+
+        return [
+            'iddeck_inimigo' => (int) $deck['iddeck_inimigo'],
+            'titulo' => $deck['titulo'],
+            'monstros' => $monstros
+        ];
     }
 
-    return [
-        'iddeck_inimigo' => (int) $deck['iddeck_inimigo'],
-        'titulo' => $deck['titulo'],
-        'monstros' => $monstros
-    ];
-}
-
-    // Getters
     public function getIdeck() {
         return $this->ideck;
+    }
+
+    public function setIdeck($ideck) {
+        $this->ideck = $ideck !== null ? (int) $ideck : null;
     }
 
     public function getIdsu() {
         return $this->idsu;
     }
 
-    public function getIdm1() {
-        return $this->idm1;
-    }
-
-    public function getIdm2() {
-        return $this->idm2;
-    }
-
-    public function getIdm3() {
-        return $this->idm3;
+    public function setIdsu($idsu) {
+        $this->idsu = $idsu !== null ? (int) $idsu : null;
     }
 
     public function getTitulo() {
         return $this->titulo;
     }
 
+    public function setTitulo($titulo) {
+        $this->titulo = trim($titulo);
+    }
+
     public function getDescartado() {
         return $this->descartado;
     }
 
-    // Setters
-    public function setIdeck($ideck) {
-        $this->ideck = $ideck;
-    }
-
-    public function setIdsu($idsu) {
-        $this->idsu = $idsu;
-    }
-
-    public function setIdm1($idm1) {
-        $this->idm1 = $idm1;
-    }
-
-    public function setIdm2($idm2) {
-        $this->idm2 = $idm2;
-    }
-
-    public function setIdm3($idm3) {
-        $this->idm3 = $idm3;
-    }
-
-    public function setTitulo($titulo) {
-        $this->titulo = $titulo;
-    }
-
     public function setDescartado($descartado) {
-        $this->descartado = $descartado;
+        $this->descartado = (int) $descartado;
     }
-} ?>
+}
+
+?>
