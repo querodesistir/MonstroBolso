@@ -115,21 +115,6 @@ class Itens {
         return $stmt->execute();
     }
 
-    // Exclui um item
-    public function ApagarItem() {
-
-        $con = new conexao();
-        $pdo = $con->pdo;
-
-        $sql = "DELETE FROM itens
-                WHERE itid = :itid";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':itid', $this->itid, PDO::PARAM_INT);
-
-        return $stmt->execute();
-    }
-
     // Getters
     public function getItid() {
         return $this->itid;

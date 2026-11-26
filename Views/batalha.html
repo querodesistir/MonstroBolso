@@ -363,6 +363,8 @@ let comandos = document.getElementById('comandos');
 
 const URL_DECK = '../Controllers/DeckController.php';
 const URL_BATALHA = '../Controllers/BatalhaController.php';
+const URL_DECK_INIMIGO = '../Controllers/DeckInimigoController.php';
+const URL_ITENS = '../Controllers/ItensController.php';
 
 let deckJogador = [];
 let ideckJogador = null;
@@ -431,6 +433,10 @@ let jogador = null;
 let inimigo = null;
 let minhaVez = false;
 let vitoriasSeguidas = 0;
+let deckInimigo = [];
+let indiceInimigo = 0;
+let iddeckInimigo = null;
+
 function normalizarElemento(elemento) {
   let valor = String(elemento || 'neutro').trim().toLowerCase();
   if (typeof valor.normalize === 'function') {
@@ -553,6 +559,42 @@ async function carregarDeckJogador() {
     credentials: 'same-origin',
     cache: 'no-store'
   });
+  async function carregarInventario() {
+    const resposta = await fetch(URL_DECK + '?acao=listarItens', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        cache: 'no-store'
+    });
+
+    let dados;
+
+    try {
+        dados = await resposta.json();
+    } catch (erro) {
+        throw new Error('O DeckController não retornou JSON válido para os itens.');
+    }
+
+    if (!resposta.ok || !dados.ok) {
+        throw new Error(dados.erro || 'Não foi possível carregar o inventário.');
+    }
+
+    if (!Array.isArray(dados.itens)) {
+        throw new Error('O inventário retornado não é uma lista válida.');
+    }
+
+    inventario = dados.itens.map(function (item) {
+        return {
+            itid: Number(item.itid),
+            nomi: String(item.nomi),
+            descri: String(item.descri || ''),
+            nefeito: Number(item.nefeito),
+            quantidade: Number(item.quantidade)
+        };
+    });
+}
 
   let dados;
   try {
@@ -568,7 +610,45 @@ async function carregarDeckJogador() {
  if (!Array.isArray(dados.deck)) {
     throw new Error('O DeckController precisa retornar uma lista em dados.deck.');
 }
+async function carregarDeckInimigo() {
+    const resposta = await fetch(URL_DECK_INIMIGO, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        cache: 'no-store'
+    });
 
+    let dados;
+
+    try {
+        dados = await resposta.json();
+    } catch (erro) {
+        throw new Error('O DeckInimigoController não retornou JSON válido.');
+    }
+
+    if (!resposta.ok || !dados.ok) {
+        throw new Error(dados.erro || 'Não foi possível carregar a equipe inimiga.');
+    }
+
+    if (
+        !dados.deck_inimigo ||
+        !Array.isArray(dados.deck_inimigo.monstros) ||
+        dados.deck_inimigo.monstros.length !== 3
+    ) {
+        throw new Error('A equipe inimiga precisa possuir três monstros.');
+    }
+
+    iddeckInimigo = Number(dados.deck_inimigo.iddeck_inimigo);
+
+    if (!Number.isInteger(iddeckInimigo) || iddeckInimigo <= 0) {
+        throw new Error('O ID da equipe inimiga é inválido.');
+    }
+
+    deckInimigo = dados.deck_inimigo.monstros.map(adaptarMonstroDoBanco);
+    indiceInimigo = 0;
+}
 ideckJogador = Number(dados.ideck);
 
 if (!Number.isInteger(ideckJogador) || ideckJogador <= 0) {
@@ -581,10 +661,19 @@ montarEscolha();
 async function iniciarTelaEscolha() {
   poeFundoEscolha();
   atualizarMoedas();
-
-  try {
+try {
     await carregarDeckJogador();
-  } catch (erro) {
+
+    try {
+        await carregarInventario();
+    } catch (erro) {
+        console.error(erro);
+
+        document.getElementById('dica-escolha').textContent =
+            'Deck carregado, mas não foi possível carregar o inventário: ' + erro.message;
+    }
+
+} catch (erro) {
     console.error(erro);
     document.getElementById('grade-iniciais').replaceChildren();
     document.getElementById('dica-escolha').textContent =
@@ -826,26 +915,50 @@ function escolherMonstro(i) {
       'Esse monstro precisa ser curado antes de batalhar.';
     return;
   }
+jogador = criarLado(m, 5);
+vitoriasSeguidas = 0;
 
-  jogador = criarLado(m, 5);
-  vitoriasSeguidas = 0;
-  proximoDesafio();
+deckInimigo = [];
+indiceInimigo = 0;
+iddeckInimigo = null;
+
+proximoDesafio();
 }
 
-/* ETAPA 3: este sorteio local sera substituido pelo deck_inimigo do banco. */
-function sortearInimigo() {
-  let m = catalogoLocal[Math.floor(Math.random() * catalogoLocal.length)];
-  while (m.inicial && !m.selvagem) {
-    m = catalogoLocal[Math.floor(Math.random() * catalogoLocal.length)];
-  }
-  return m;
-}
+async function proximoDesafio() {
+    let nv = 5 + vitoriasSeguidas;
 
-function proximoDesafio() {
-  let nv = 5 + vitoriasSeguidas;
-  if (nv > 12) nv = 12;
-  inimigo = criarLado(sortearInimigo(), nv);
-  mostrarBatalha();
+    if (nv > 12) {
+        nv = 12;
+    }
+
+    try {
+        if (
+            deckInimigo.length === 0 ||
+            indiceInimigo >= deckInimigo.length
+        ) {
+            await carregarDeckInimigo();
+        }
+
+        let monstroInimigo = deckInimigo[indiceInimigo];
+
+        indiceInimigo++;
+
+        inimigo = criarLado(monstroInimigo, nv);
+
+        mostrarBatalha();
+
+    } catch (erro) {
+        console.error(erro);
+
+        document.getElementById('titulo-resultado').textContent =
+            'Não foi possível iniciar o desafio';
+
+        document.getElementById('texto-resultado').textContent =
+            erro.message;
+
+        document.getElementById('resultado').classList.remove('escondida');
+    }
 }
 
 function atualizarFaixa() {

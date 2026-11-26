@@ -116,7 +116,27 @@ class LogBatalha {
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+public function registrarUsoItem($idBa, $rodada, $itid, $idsu) {
 
+    $con = new conexao();
+    $pdo = $con->pdo;
+
+    $sql = "INSERT INTO logbatalhas
+            (idBa, rodada, acao, dano, itid, idsu)
+            VALUES
+            (:idBa, :rodada, :acao, :dano, :itid, :idsu)";
+
+    $stmt = $pdo->prepare($sql);
+
+    return $stmt->execute([
+        ':idBa' => $idBa,
+        ':rodada' => $rodada,
+        ':acao' => 'item',
+        ':dano' => 0,
+        ':itid' => $itid,
+        ':idsu' => $idsu
+    ]);
+}
     // Getters
     public function getIdlog() {
         return $this->idlog;

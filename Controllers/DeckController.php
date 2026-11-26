@@ -8,9 +8,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 try {
 
-    // Verifica se existe um jogador identificado na sessão
-    if (!isset($_SESSION['idsu'])) {
-
+    if (!isset($_SESSION['idsu']) || (int) $_SESSION['idsu'] <= 0) {
         http_response_code(401);
 
         echo json_encode([
@@ -23,7 +21,7 @@ try {
 
     $idsu = (int) $_SESSION['idsu'];
 
-    $deckModel = new Deck();
+    $deckModel = new Deck($idsu);
 
     $monstroModel = new Monstro(
         '',
@@ -39,15 +37,12 @@ try {
 
     $acao = $_GET['acao'] ?? 'listar';
 
-    // Verifica se a ação solicitada é válida
-   if (!in_array($acao, [
-    'listar',
-    'adicionar',
-    'retirar',
-    'renovar',
-    'comprar',
-    'usar'
-], true)) {
+    if (!in_array($acao, [
+        'listar',
+        'adicionar',
+        'retirar',
+        'renovar'
+    ], true)) {
 
         http_response_code(400);
 
@@ -58,55 +53,12 @@ try {
 
         exit;
     }
-// Ações relacionadas aos itens
-if ($acao === 'comprar' || $acao === 'usar') {
 
-    $itid = isset($_POST['itid']) ? (int) $_POST['itid'] : 0;
-
-    if ($itid <= 0) {
-        http_response_code(400);
-        echo json_encode([
-            'ok' => false,
-            'erro' => 'Item inválido.'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    $itemModel = new Item_su($idsu, $itid, 0);
-
-    if ($acao === 'comprar') {
-        $resultado = $itemModel->comprarItem();
-    } else {
-        $resultado = $itemModel->usarItem();
-    }
-
-    if (!$resultado) {
-        http_response_code(400);
-        echo json_encode([
-            'ok' => false,
-            'erro' => $acao === 'comprar'
-                ? 'Não foi possível comprar o item. Verifique seu saldo.'
-                : 'Você não possui esse item no inventário.'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    echo json_encode([
-        'ok' => true,
-        'mensagem' => $acao === 'comprar'
-            ? 'Item comprado com sucesso!'
-            : 'Item utilizado com sucesso!',
-        'itens' => Item_su::ListarItensUsu($idsu)
-    ], JSON_UNESCAPED_UNICODE);
-
-    exit;
-}
     if ($acao === 'renovar') {
 
         $resultado = $deckModel->renovarDeck($idsu);
 
-        if ($resultado === false) {
-
+        if (!$resultado) {
             http_response_code(400);
 
             echo json_encode([
@@ -116,92 +68,87 @@ if ($acao === 'comprar' || $acao === 'usar') {
 
             exit;
         }
+    }
 
-    } else {
+    $deckAtual = $deckModel->buscarDeckAtivo($idsu);
 
-        // Busca o deck ativo do jogador
-        $deckAtual = $deckModel->buscarDeckAtivo($idsu);
+    if (!$deckAtual) {
+        http_response_code(404);
 
-        if (!$deckAtual) {
+        echo json_encode([
+            'ok' => false,
+            'erro' => 'Nenhum deck ativo encontrado.'
+        ], JSON_UNESCAPED_UNICODE);
 
-            http_response_code(404);
+        exit;
+    }
+
+    $ideck = (int) $deckAtual['ideck'];
+
+    if ($acao === 'adicionar') {
+
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+
+        if ($id <= 0) {
+            http_response_code(400);
 
             echo json_encode([
                 'ok' => false,
-                'erro' => 'Nenhum deck ativo encontrado.'
+                'erro' => 'Monstro inválido.'
             ], JSON_UNESCAPED_UNICODE);
 
             exit;
         }
 
-        $ideck = (int) $deckAtual['ideck'];
+        $deckMonstroModel = new DeckMonstro($ideck, $id);
 
-        if ($acao === 'adicionar') {
+        $resultado = $deckMonstroModel->adicionarMonstro($idsu);
 
-            $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        if (!$resultado) {
+            http_response_code(400);
 
-            if ($id <= 0) {
+            echo json_encode([
+                'ok' => false,
+                'erro' => 'Não foi possível adicionar o monstro.'
+            ], JSON_UNESCAPED_UNICODE);
 
-                http_response_code(400);
+            exit;
+        }
 
-                echo json_encode([
-                    'ok' => false,
-                    'erro' => 'Monstro inválido.'
-                ], JSON_UNESCAPED_UNICODE);
+    } elseif ($acao === 'retirar') {
 
-                exit;
-            }
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
-            $resultado = $deckModel->Addeck($ideck, $idsu, $id);
+        if ($id <= 0) {
+            http_response_code(400);
 
-            if (!$resultado) {
+            echo json_encode([
+                'ok' => false,
+                'erro' => 'Monstro inválido.'
+            ], JSON_UNESCAPED_UNICODE);
 
-                http_response_code(400);
+            exit;
+        }
 
-                echo json_encode([
-                    'ok' => false,
-                    'erro' => 'Não foi possível adicionar o monstro.'
-                ], JSON_UNESCAPED_UNICODE);
+        $deckMonstroModel = new DeckMonstro($ideck);
 
-                exit;
-            }
+        $resultado = $deckMonstroModel->retirarMonstro($idsu, $id);
 
-        } elseif ($acao === 'retirar') {
+        if (!$resultado) {
+            http_response_code(400);
 
-            $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+            echo json_encode([
+                'ok' => false,
+                'erro' => 'Não foi possível retirar o monstro.'
+            ], JSON_UNESCAPED_UNICODE);
 
-            if ($id <= 0) {
-
-                http_response_code(400);
-
-                echo json_encode([
-                    'ok' => false,
-                    'erro' => 'Monstro inválido.'
-                ], JSON_UNESCAPED_UNICODE);
-
-                exit;
-            }
-
-            $resultado = $deckModel->TiradoDeck($ideck, $idsu, $id);
-
-            if (!$resultado) {
-
-                http_response_code(400);
-
-                echo json_encode([
-                    'ok' => false,
-                    'erro' => 'Não foi possível retirar o monstro.'
-                ], JSON_UNESCAPED_UNICODE);
-
-                exit;
-            }
+            exit;
         }
     }
 
     $deckAtual = $deckModel->buscarDeckAtivo($idsu);
 
     if (!$deckAtual) {
-
         http_response_code(404);
 
         echo json_encode([
@@ -214,12 +161,10 @@ if ($acao === 'comprar' || $acao === 'usar') {
 
     $ideck = (int) $deckAtual['ideck'];
 
- $deckMonstroModel = new DeckMonstro($ideck);
+    $deckMonstroModel = new DeckMonstro($ideck);
 
-$MonstrosDeck = $deckMonstroModel->listarMonstros($idsu);
-    );
+    $monstrosDeck = $deckMonstroModel->listarMonstros($idsu);
 
-    // Busca os monstros disponíveis para adicionar
     $listaMonstros = $monstroModel->ListarMonstroForadoDeck(
         $ideck,
         $idsu
@@ -228,7 +173,7 @@ $MonstrosDeck = $deckMonstroModel->listarMonstros($idsu);
     echo json_encode([
         'ok' => true,
         'ideck' => $ideck,
-        'deck' => $MonstrosDeck,
+        'deck' => $monstrosDeck,
         'disponiveis' => $listaMonstros
     ], JSON_UNESCAPED_UNICODE);
 
@@ -236,7 +181,7 @@ $MonstrosDeck = $deckMonstroModel->listarMonstros($idsu);
 
     http_response_code(500);
 
-    error_log($e->getMessage());
+    error_log('Erro no DeckController: ' . $e->getMessage());
 
     echo json_encode([
         'ok' => false,
