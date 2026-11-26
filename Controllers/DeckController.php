@@ -198,7 +198,6 @@ if ($acao === 'comprar' || $acao === 'usar') {
         }
     }
 
-    // Busca novamente o deck ativo
     $deckAtual = $deckModel->buscarDeckAtivo($idsu);
 
     if (!$deckAtual) {
@@ -215,10 +214,9 @@ if ($acao === 'comprar' || $acao === 'usar') {
 
     $ideck = (int) $deckAtual['ideck'];
 
-    // Busca os monstros que estão no deck
-    $MonstrosDeck = $monstroModel->MonstrosnoDeck(
-        $ideck,
-        $idsu
+ $deckMonstroModel = new DeckMonstro($ideck);
+
+$MonstrosDeck = $deckMonstroModel->listarMonstros($idsu);
     );
 
     // Busca os monstros disponíveis para adicionar

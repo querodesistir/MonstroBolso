@@ -191,6 +191,68 @@ class Deck {
         return false;
     }
 
+public function buscarDeckInimigoAleatorio() {
+
+    $con = new conexao();
+    $pdo = $con->pdo;
+
+    $sql = "SELECT iddeck_inimigo, idm1, idm2, idm3, titulo
+            FROM deck_inimigo
+            ORDER BY RAND()
+            LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+
+    $deck = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$deck) {
+        return false;
+    }
+
+    $sqlMonstros = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
+                           m.hp AS ahp, m.def, m.prio, m.danoEspecial,
+                           m.tipid, t.elemento, m.veloz
+                    FROM monstro m
+                    INNER JOIN tipo t
+                        ON t.tipid = m.tipid
+                    WHERE m.id IN (:idm1, :idm2, :idm3)";
+
+    $stmtMonstros = $pdo->prepare($sqlMonstros);
+
+    $stmtMonstros->execute([
+        ':idm1' => $deck['idm1'],
+        ':idm2' => $deck['idm2'],
+        ':idm3' => $deck['idm3']
+    ]);
+
+    $registros = $stmtMonstros->fetchAll(PDO::FETCH_ASSOC);
+
+    $monstrosPorId = [];
+
+    foreach ($registros as $registro) {
+        $monstrosPorId[(int) $registro['id']] = $registro;
+    }
+
+    $monstros = [];
+
+    foreach (['idm1', 'idm2', 'idm3'] as $campo) {
+        $idMonstro = (int) $deck[$campo];
+
+        if (!isset($monstrosPorId[$idMonstro])) {
+            return false;
+        }
+
+        $monstros[] = $monstrosPorId[$idMonstro];
+    }
+
+    return [
+        'iddeck_inimigo' => (int) $deck['iddeck_inimigo'],
+        'titulo' => $deck['titulo'],
+        'monstros' => $monstros
+    ];
+}
+
     // Getters
     public function getIdeck() {
         return $this->ideck;

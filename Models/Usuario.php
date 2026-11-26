@@ -62,8 +62,6 @@ class Usuario {
 
         return false;
     }
-
-    // Consulta o perfil do jogador
     public function VerPerfil() {
         $con = new conexao();
         $pdo = $con->pdo;
@@ -88,9 +86,6 @@ class Usuario {
 
         return $dados;
     }
-
-    // Edita o perfil do jogador
-    // Edita o perfil do jogador
 public function EditarPerfil($apelido) {
     $con = new conexao();
     $pdo = $con->pdo;
@@ -111,7 +106,6 @@ public function EditarPerfil($apelido) {
         return true;
     }
 
-    // Verifica se o jogador existe e já possui esse apelido
     $sql = "SELECT idsu FROM usuario WHERE idsu = :idsu";
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':idsu', $this->idsu);

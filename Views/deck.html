@@ -1064,39 +1064,20 @@ function montarTabela(tabela, monstros, acao) {
 
         linha.appendChild(defesa);
 
-
-
-
-
-        // BOTÃO DE AÇÃO
-
         const acaoCelula = document.createElement('td');
-
 
 
         const botao = document.createElement('button');
 
-
-
         botao.type = "button";
-
-
 
         botao.className = "botao-acao";
 
-
-
         if (acao === "adicionar") {
-
-
 
             botao.textContent = "＋ Selecionar";
 
-
-
             botao.classList.add("botao-adicionar");
-
-
 
         } else {
 

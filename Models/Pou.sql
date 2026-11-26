@@ -152,3 +152,6 @@ VALUES
 (15, 'Glaciadraco', 'Glaciadraco.png', 50, 850, 850, 45, 4, 100, 6, 95),
 
 (16, 'Cristalume', 'Cristalume.png', 35, 750, 750, 50, 3, 85, 6, 65);
+
+INSERT INTO deck_inimigo (idm1, idm2, idm3, titulo) 
+VALUES (5, 7, 11, 'Equipe teste');

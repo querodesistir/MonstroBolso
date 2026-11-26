@@ -111,32 +111,35 @@ class Monstro {
     // Lista os monstros que estão no deck
     public function MonstrosnoDeck($ideck, $idsu) {
 
-        $con = new conexao();
-        $pdo = $con->pdo;
+    $con = new conexao();
+    $pdo = $con->pdo;
 
-        $sql = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
-                       m.ahp, m.def, m.prio, m.danoEspecial, m.veloz
-                FROM deck d
-                INNER JOIN monstro m
-                    ON (
-                        m.id = d.idm1
-                        OR m.id = d.idm2
-                        OR m.id = d.idm3
-                    )
-                WHERE d.ideck = :ideck
-                AND d.idsu = :idsu
-                AND d.descartado = 0
-                ORDER BY FIELD(m.id, d.idm1, d.idm2, d.idm3)";
+    $sql = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
+                   m.ahp, m.def, m.prio, m.danoEspecial,
+                   m.tipid, t.elemento, m.veloz
+            FROM deck d
+            INNER JOIN monstro m
+                ON (
+                    m.id = d.idm1
+                    OR m.id = d.idm2
+                    OR m.id = d.idm3
+                )
+            INNER JOIN tipo t
+                ON t.tipid = m.tipid
+            WHERE d.ideck = :ideck
+            AND d.idsu = :idsu
+            AND d.descartado = 0
+            ORDER BY FIELD(m.id, d.idm1, d.idm2, d.idm3)";
 
-        $stmt = $pdo->prepare($sql);
+    $stmt = $pdo->prepare($sql);
 
-        $stmt->execute([
-            ':ideck' => $ideck,
-            ':idsu' => $idsu
-        ]);
+    $stmt->execute([
+        ':ideck' => $ideck,
+        ':idsu' => $idsu
+    ]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     // Getters
     public function getId() {
