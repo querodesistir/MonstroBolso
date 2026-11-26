@@ -1,3 +1,4 @@
+
 <?php
 
 class DeckMonstro {
@@ -21,7 +22,16 @@ class DeckMonstro {
         $this->iddeck_monstro = $iddeck_monstro;
     }
 
-    public function adicionarMonstro($idsu, $idm) {
+    public function adicionarMonstro($idsu) {
+
+        $ideck = (int) $this->ideck;
+        $idm = (int) $this->idm;
+        $idsu = (int) $idsu;
+
+        if ($ideck <= 0 || $idm <= 0 || $idsu <= 0) {
+            return false;
+        }
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -37,7 +47,7 @@ class DeckMonstro {
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                ':ideck' => $this->ideck,
+                ':ideck' => $ideck,
                 ':idsu' => $idsu
             ]);
 
@@ -53,7 +63,7 @@ class DeckMonstro {
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                ':ideck' => $this->ideck,
+                ':ideck' => $ideck,
                 ':idm' => $idm
             ]);
 
@@ -68,15 +78,18 @@ class DeckMonstro {
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                ':ideck' => $this->ideck
+                ':ideck' => $ideck
             ]);
 
-            $posicoesOcupadas = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $posicoesOcupadas = array_map(
+                'intval',
+                $stmt->fetchAll(PDO::FETCH_COLUMN)
+            );
 
             $posicaoLivre = null;
 
             for ($i = 1; $i <= 3; $i++) {
-                if (!in_array($i, array_map('intval', $posicoesOcupadas), true)) {
+                if (!in_array($i, $posicoesOcupadas, true)) {
                     $posicaoLivre = $i;
                     break;
                 }
@@ -110,22 +123,23 @@ class DeckMonstro {
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                ':ideck' => $this->ideck,
+                ':ideck' => $ideck,
                 ':idm' => $idm,
                 ':posicao' => $posicaoLivre,
                 ':ahp' => $monstro['hp']
             ]);
 
-            $this->iddeck_monstro = $pdo->lastInsertId();
+            $this->iddeck_monstro = (int) $pdo->lastInsertId();
             $this->idm = $idm;
             $this->posicao = $posicaoLivre;
-            $this->ahp = $monstro['hp'];
+            $this->ahp = (int) $monstro['hp'];
 
             $pdo->commit();
 
             return true;
 
         } catch (Throwable $e) {
+
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
@@ -135,6 +149,7 @@ class DeckMonstro {
     }
 
     public function retirarMonstro($idsu, $idm) {
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -159,6 +174,7 @@ class DeckMonstro {
     }
 
     public function listarMonstros($idsu) {
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -186,7 +202,7 @@ class DeckMonstro {
                 WHERE dm.ideck = :ideck
                 AND d.idsu = :idsu
                 AND d.descartado = 0
-                ORDER BY dm.posicao";
+                ORDER BY dm.posicao ASC";
 
         $stmt = $pdo->prepare($sql);
 
@@ -199,6 +215,7 @@ class DeckMonstro {
     }
 
     public function atualizarHP($idsu, $idm, $ahp) {
+
         $con = new conexao();
         $pdo = $con->pdo;
 
@@ -229,17 +246,22 @@ class DeckMonstro {
 
         $ahp = max(0, min((int) $ahp, (int) $monstro['hp']));
 
-        $sql = "UPDATE deck_monstro
-                SET ahp = :ahp
-                WHERE ideck = :ideck
-                AND idm = :idm";
+        $sql = "UPDATE deck_monstro dm
+                INNER JOIN deck d
+                    ON d.ideck = dm.ideck
+                SET dm.ahp = :ahp
+                WHERE dm.ideck = :ideck
+                AND dm.idm = :idm
+                AND d.idsu = :idsu
+                AND d.descartado = 0";
 
         $stmt = $pdo->prepare($sql);
 
         $resultado = $stmt->execute([
             ':ahp' => $ahp,
             ':ideck' => $this->ideck,
-            ':idm' => $idm
+            ':idm' => $idm,
+            ':idsu' => $idsu
         ]);
 
         if ($resultado) {

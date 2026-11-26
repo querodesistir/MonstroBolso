@@ -69,10 +69,8 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
             margin-top: 15px;
         }
     </style>
-    
 </head>
 <body>
-
    <nav class="menu">
         <ul>
            
@@ -84,27 +82,63 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
         </ul>
     </nav>
 <script>
-    async function iniciarJogo() {
-        try {
+async function iniciarJogo() {
 
-            const resposta = await fetch("../Controllers/criarSessao.php", {
-                method: "GET",
-                credentials: "same-origin",
-                cache: "no-store"
-            });
+const menu = document.getElementById("menuJogo");
+const mensagemErro = document.getElementById("erroInicializacao");
 
-            if (!resposta.ok) {
-                throw new Error("Não foi possível iniciar a sessão.");
-            }
+try {
 
-        } catch (erro) {
-
-            console.error("Erro ao iniciar o jogo:", erro);
-
+    const resposta = await fetch("../Controllers/criarSessao.php", {
+        method: "GET",
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: {
+            "Accept": "application/json"
         }
+    });
 
+    if (!resposta.ok) {
+        throw new Error(
+            "Erro HTTP " + resposta.status +
+            ". Verifique o caminho do criarSessao.php."
+        );
     }
-    iniciarJogo();
+
+    const tipoResposta = resposta.headers.get("content-type") || "";
+
+    if (!tipoResposta.includes("application/json")) {
+        throw new Error(
+            "O servidor não retornou JSON. Verifique o arquivo criarSessao.php."
+        );
+    }
+
+    const dados = await resposta.json();
+
+    if (!dados.ok || !dados.usuario || !dados.usuario.idsu) {
+        throw new Error(
+            dados.erro || "Não foi possível identificar o jogador."
+        );
+    }
+
+    console.log("Jogador identificado:", dados.usuario);
+
+    menu.hidden = false;
+    mensagemErro.hidden = true;
+
+} catch (erro) {
+
+    console.error("Erro ao iniciar o jogo:", erro);
+
+    mensagemErro.textContent =
+        "Não foi possível iniciar o jogo. " + erro.message;
+
+    mensagemErro.hidden = false;
+    menu.hidden = true;
+}
+}
+
+iniciarJogo();
 </script>
 </body>
 </html>

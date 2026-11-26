@@ -1,6 +1,5 @@
 
 <?php
-
 class Monstro {
 
     private $id;
@@ -41,7 +40,6 @@ class Monstro {
         $this->veloz = $veloz;
     }
 
-    // Pesquisa um monstro pelo nome
     public function buscarMonstro() {
 
         $con = new conexao();
@@ -64,7 +62,6 @@ class Monstro {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Lista todos os monstros cadastrados
     public function ListarMonstros() {
 
         $con = new conexao();
@@ -80,23 +77,62 @@ class Monstro {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lista os monstros que não estão no deck
     public function ListarMonstroForadoDeck($ideck, $idsu) {
 
         $con = new conexao();
         $pdo = $con->pdo;
 
         $sql = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
-                       m.ahp, m.def, m.prio, m.danoEspecial, m.veloz
+                       m.hp AS ahp, m.def, m.prio, m.danoEspecial,
+                       m.tipid, t.elemento, m.veloz
                 FROM monstro m
-                INNER JOIN deck d
-                    ON d.ideck = :ideck
+                INNER JOIN tipo t
+                    ON t.tipid = m.tipid
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM deck d
+                    WHERE d.ideck = :ideck
                     AND d.idsu = :idsu
                     AND d.descartado = 0
-                WHERE (d.idm1 IS NULL OR d.idm1 <> m.id)
-                AND (d.idm2 IS NULL OR d.idm2 <> m.id)
-                AND (d.idm3 IS NULL OR d.idm3 <> m.id)
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM deck_monstro dm
+                    WHERE dm.ideck = :ideck_monstros
+                    AND dm.idm = m.id
+                )
                 ORDER BY m.dano DESC";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            ':ideck' => $ideck,
+            ':idsu' => $idsu,
+            ':ideck_monstros' => $ideck
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function MonstrosnoDeck($ideck, $idsu) {
+
+        $con = new conexao();
+        $pdo = $con->pdo;
+
+        $sql = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
+                       dm.ahp, m.def, m.prio, m.danoEspecial,
+                       m.tipid, t.elemento, m.veloz, dm.posicao
+                FROM deck d
+                INNER JOIN deck_monstro dm
+                    ON dm.ideck = d.ideck
+                INNER JOIN monstro m
+                    ON m.id = dm.idm
+                INNER JOIN tipo t
+                    ON t.tipid = m.tipid
+                WHERE d.ideck = :ideck
+                AND d.idsu = :idsu
+                AND d.descartado = 0
+                ORDER BY dm.posicao ASC";
 
         $stmt = $pdo->prepare($sql);
 
@@ -108,40 +144,6 @@ class Monstro {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lista os monstros que estão no deck
-    public function MonstrosnoDeck($ideck, $idsu) {
-
-    $con = new conexao();
-    $pdo = $con->pdo;
-
-    $sql = "SELECT m.id, m.nome, m.imagem, m.dano, m.hp,
-                   m.ahp, m.def, m.prio, m.danoEspecial,
-                   m.tipid, t.elemento, m.veloz
-            FROM deck d
-            INNER JOIN monstro m
-                ON (
-                    m.id = d.idm1
-                    OR m.id = d.idm2
-                    OR m.id = d.idm3
-                )
-            INNER JOIN tipo t
-                ON t.tipid = m.tipid
-            WHERE d.ideck = :ideck
-            AND d.idsu = :idsu
-            AND d.descartado = 0
-            ORDER BY FIELD(m.id, d.idm1, d.idm2, d.idm3)";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([
-        ':ideck' => $ideck,
-        ':idsu' => $idsu
-    ]);
-
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-    // Getters
     public function getId() {
         return $this->id;
     }
@@ -186,7 +188,6 @@ class Monstro {
         return $this->veloz;
     }
 
-    // Setters
     public function setId($id) {
         $this->id = $id;
     }

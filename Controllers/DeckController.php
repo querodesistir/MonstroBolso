@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -21,20 +22,6 @@ try {
 
     $idsu = (int) $_SESSION['idsu'];
 
-    $deckModel = new Deck($idsu);
-
-    $monstroModel = new Monstro(
-        '',
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
-
     $acao = $_GET['acao'] ?? 'listar';
 
     if (!in_array($acao, [
@@ -54,11 +41,50 @@ try {
         exit;
     }
 
+    if ($acao === 'listar' && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+        http_response_code(405);
+
+        echo json_encode([
+            'ok' => false,
+            'erro' => 'Método de requisição inválido.'
+        ], JSON_UNESCAPED_UNICODE);
+
+        exit;
+    }
+
+    if (
+        in_array($acao, ['adicionar', 'retirar', 'renovar'], true) &&
+        $_SERVER['REQUEST_METHOD'] !== 'POST'
+    ) {
+        http_response_code(405);
+
+        echo json_encode([
+            'ok' => false,
+            'erro' => 'Método de requisição inválido.'
+        ], JSON_UNESCAPED_UNICODE);
+
+        exit;
+    }
+
+    $deckModel = new Deck($idsu);
+
+    $monstroModel = new Monstro(
+        '',
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    );
+
     if ($acao === 'renovar') {
 
-        $resultado = $deckModel->renovarDeck($idsu);
+        $ideck = $deckModel->renovarDeck();
 
-        if (!$resultado) {
+        if (!$ideck) {
             http_response_code(400);
 
             echo json_encode([
@@ -68,22 +94,24 @@ try {
 
             exit;
         }
+
+    } else {
+
+        $ideck = $deckModel->buscarDeckAtivo();
+
+        if (!$ideck) {
+            http_response_code(404);
+
+            echo json_encode([
+                'ok' => false,
+                'erro' => 'Nenhum deck ativo encontrado.'
+            ], JSON_UNESCAPED_UNICODE);
+
+            exit;
+        }
     }
 
-    $deckAtual = $deckModel->buscarDeckAtivo($idsu);
-
-    if (!$deckAtual) {
-        http_response_code(404);
-
-        echo json_encode([
-            'ok' => false,
-            'erro' => 'Nenhum deck ativo encontrado.'
-        ], JSON_UNESCAPED_UNICODE);
-
-        exit;
-    }
-
-    $ideck = (int) $deckAtual['ideck'];
+    $ideck = (int) $ideck;
 
     if ($acao === 'adicionar') {
 
@@ -145,21 +173,6 @@ try {
             exit;
         }
     }
-
-    $deckAtual = $deckModel->buscarDeckAtivo($idsu);
-
-    if (!$deckAtual) {
-        http_response_code(404);
-
-        echo json_encode([
-            'ok' => false,
-            'erro' => 'Não foi possível localizar o deck atualizado.'
-        ], JSON_UNESCAPED_UNICODE);
-
-        exit;
-    }
-
-    $ideck = (int) $deckAtual['ideck'];
 
     $deckMonstroModel = new DeckMonstro($ideck);
 
