@@ -1,0 +1,330 @@
+/* ============================================================
+   LOJA DE ITENS DO MONSTROBOLSO — visual estilo Poké Mart
+   janela azul com lista de itens e botão Fechar, igual à imagem,
+   e uma floresta fantasia atrás da loja.
+   as moedas ficam salvas no localStorage (mb_moedas) e os itens
+   também (mb_<item>), a batalha lê as mesmas chaves
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+
+button, .mart-item { font-family: inherit; cursor: pointer; }
+a { text-decoration: none; }
+
+/* ---------- a janela da loja (estilo Poké Mart) ---------- */
+.mart-janela {
+  max-width: 660px;
+  margin: 26px auto 22px;
+  background: #2f7fd6;
+  border: 4px solid #10315f;
+  border-radius: 16px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.25);
+  overflow: hidden;
+}
+
+.mart-topo {
+  background: linear-gradient(#3b8fe8, #1e5fc0);
+  border-bottom: 4px solid #10315f;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mart-titulo {
+  color: #fff;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0 #0c2c58, 3px 3px 6px rgba(0,0,0,.4);
+}
+
+.mart-titulo span {
+  display: block;
+  font-size: 13px;
+  font-weight: normal;
+  letter-spacing: 0;
+  color: #cfe4ff;
+  text-shadow: 1px 1px 0 #0c2c58;
+}
+
+.mart-topo-dir {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* moedas no canto, caixinha branca como no jogo */
+#caixa-moedas {
+  background: #fffdf2;
+  border: 3px solid #10315f;
+  border-radius: 30px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.35);
+  padding: 6px 14px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #7a5b00;
+  white-space: nowrap;
+}
+#caixa-moedas.treme { animation: tremeMoeda .4s ease; }
+@keyframes tremeMoeda {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.12) rotate(-2deg); }
+  70% { transform: scale(1.08) rotate(2deg); }
+}
+
+/* botão Fechar, igual ao Close do Poké Mart */
+.btn-fechar {
+  background: #fffdf2;
+  color: #14335f;
+  border: 3px solid #10315f;
+  border-radius: 10px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.35);
+  padding: 7px 18px;
+  font-weight: bold;
+  font-size: 17px;
+}
+.btn-fechar:active { transform: translate(2px, 2px); box-shadow: none; }
+
+/* faixinha explicativa logo abaixo do topo */
+.mart-sub {
+  background: rgba(12,44,88,.35);
+  color: #dbeeff;
+  font-size: 13.5px;
+  line-height: 1.5;
+  padding: 9px 16px;
+  border-bottom: 2px solid rgba(255,255,255,.18);
+}
+.mart-sub b { color: #ffe27a; }
+
+/* ---------- lista de itens à venda ---------- */
+.mart-lista {
+  padding: 10px 12px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mart-secao {
+  color: #ffe27a;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 rgba(9,38,74,.8);
+  padding: 9px 4px 2px;
+}
+
+.mart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border: 2px solid rgba(255,255,255,.5);
+  border-radius: 10px;
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 11px 14px;
+  text-shadow: 1px 1px 0 rgba(9,38,74,.8);
+  transition: background .12s, transform .12s;
+  text-align: left;
+}
+
+/* listras alternadas como no Poké Mart */
+.mart-item:nth-of-type(odd) { background: rgba(255,255,255,.26); }
+
+.mart-item:hover { background: rgba(255,255,255,.4); transform: translateX(3px); }
+.mart-item:active { transform: translate(1px, 2px); }
+
+.mart-item .mi-nome { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mart-item .mi-preco { white-space: nowrap; font-size: 17px; color: #fff; }
+
+/* tagzinha de descrição dentro do item */
+.mart-item .mi-tag {
+  font-size: 11px;
+  font-weight: bold;
+  background: #2ca24a;
+  border-radius: 20px;
+  padding: 2px 9px;
+  text-shadow: none;
+  color: #fff;
+}
+
+/* quando não dá pra comprar (sem moedas) o item apaga */
+.mart-item.sem-moeda { opacity: .45; cursor: not-allowed; }
+.mart-item.sem-moeda:hover { transform: none; }
+
+.mart-pes {
+  color: #d5eaff;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px 14px 14px;
+  line-height: 1.5;
+  text-shadow: 1px 1px 0 rgba(9,38,74,.7);
+}
+
+/* ---------- painéis de baixo (mochila, como funciona, histórico) ---------- */
+.painel-titulo {
+  background: linear-gradient(#3b8fe8, #1e5fc0);
+  border-bottom: 3px solid #10315f;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 10px 16px;
+  text-shadow: 2px 2px 0 #0c2c58;
+}
+.painel-corpo { padding: 14px 16px 16px; }
+.painel-corpo .nota { color: #cfe4ff; font-size: 13px; margin-bottom: 12px; text-shadow: 1px 1px 0 rgba(9,38,74,.7); }
+
+.linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #fffdf2;
+  color: #22304a;
+  border: 2px solid #10315f;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  flex-wrap: wrap;
+}
+.linha .qtd {
+  background: #1e5fc0;
+  color: #ffe27a;
+  border-radius: 30px;
+  padding: 2px 14px;
+  font-size: 15px;
+}
+.linha .usavel { font-size: 12px; font-weight: normal; color: #2ca24a; }
+
+/* passos do "como funciona" */
+.passo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #eaf4ff;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 0 rgba(9,38,74,.7);
+}
+.passo .numero {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: #ffe27a;
+  color: #14335f;
+  border: 2px solid #10315f;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.passo b { color: #ffe27a; }
+
+/* histórico */
+#lista-historico { list-style: none; }
+#lista-historico li {
+  background: #fffdf2;
+  color: #22304a;
+  border: 2px solid #10315f;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#lista-historico li .quando { color: #8a94a8; font-size: 12px; }
+#lista-historico .vazio { color: #5f6d86; font-style: italic; font-size: 14px; background: rgba(255,255,255,.75); }
+
+/* ---------- rodapé com a dica ---------- */
+#rodape { max-width: 660px; margin: 0 auto 40px; text-align: center; padding: 0 14px; }
+
+.btn-voltar {
+  display: inline-block;
+  background: #ffe27a;
+  color: #14335f;
+  border: 3px solid #10315f;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 17px;
+  font-weight: bold;
+  box-shadow: 3px 3px 0 rgba(0,0,0,.45);
+}
+.btn-voltar:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,.45); }
+
+#dica-ganho {
+  color: #f3f7ff;
+  font-size: 14px;
+  margin-top: 16px;
+  line-height: 1.55;
+  text-shadow: 1px 1px 2px rgba(0,0,0,.8);
+}
+
+/* ---------- mensagem que sobe quando compra ---------- */
+#mensagem {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%) translateY(30px);
+  background: #fffdf2;
+  color: #22304a;
+  border: 3px solid #10315f;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.5);
+  padding: 12px 22px;
+  font-weight: bold;
+  font-size: 15px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s, transform .25s;
+  z-index: 30;
+  max-width: 90vw;
+  text-align: center;
+}
+#mensagem.apareceu { opacity: 1; transform: translateX(-50%) translateY(0); }
+#mensagem.boa { border-color: #2ca24a; }
+#mensagem.ruim { border-color: #c9553d; }
+
+/* ---------- celular ---------- */
+@media (max-width: 560px) {
+  .mart-janela { margin: 14px 10px 16px; }
+  .mart-titulo { font-size: 21px; }
+  .mart-item { font-size: 14px; padding: 10px 11px; }
+  .mart-item .mi-preco { font-size: 15px; }
+  .mart-item .mi-tag { font-size: 10px; }
+  #caixa-moedas { font-size: 14px; padding: 5px 10px; }
+  .btn-fechar { font-size: 15px; padding: 6px 14px; }
+  #rodape { margin-bottom: 30px; }
+}
+
+/* ajustes da versao PHP */
+.mart-lista form { display: contents; }
+.mart-item.impar { background: rgba(255,255,255,.26); }
+#cartao-confirmar {
+  background: #fffdf2; color: #22304a; border: 3px solid #10315f; border-radius: 10px;
+  padding: 10px 14px; margin: 8px 12px; font-size: 15px; font-weight: bold;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+}
+#cartao-confirmar form { display: contents; }
+#cartao-confirmar .btn-sim, #cartao-confirmar .btn-nao {
+  border-radius: 8px; padding: 6px 16px; font-weight: bold; cursor: pointer; font-size: 14px; border: 2px solid #10315f;
+}
+#cartao-confirmar .btn-sim { background: #ffe27a; }
+#cartao-confirmar .btn-nao { background: #f3f3ee; }
