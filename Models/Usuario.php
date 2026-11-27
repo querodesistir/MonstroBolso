@@ -8,11 +8,7 @@ class Usuario {
     private $dindin;
     private $nivel;
 
-    public function __construct(
-        $apelido = 'Jogador',
-        $dindin = 0,
-        $nivel = 0
-    ) {
+    public function __construct( $apelido = 'Jogador', $dindin = 0,$nivel = 0) {
         $this->apelido = $apelido;
         $this->dindin = $dindin;
         $this->nivel = $nivel;
@@ -30,13 +26,7 @@ class Usuario {
                 WHERE token_hash = :token_hash";
 
         $stmt = $pdo->prepare($sql);
-
-        $stmt->bindValue(
-            ':token_hash',
-            $tokenHash,
-            PDO::PARAM_STR
-        );
-
+        $stmt->bindValue(':token_hash', $tokenHash, PDO::PARAM_STR);
         $stmt->execute();
 
         $dados = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -47,8 +37,8 @@ class Usuario {
 
         $this->idsu = (int) $dados['idsu'];
         $this->apelido = $dados['apelido'];
-        $this->dindin = $dados['dindin'];
-        $this->nivel = $dados['nivel'];
+        $this->dindin = (int) $dados['dindin'];
+        $this->nivel = (int) $dados['nivel'];
 
         return true;
     }
@@ -74,19 +64,16 @@ class Usuario {
 
         $stmt = $pdo->prepare($sql);
 
-        $stmt->bindValue(':token_hash', $tokenHash);
-        $stmt->bindValue(':apelido', $this->apelido);
-        $stmt->bindValue(':dindin', $this->dindin);
-        $stmt->bindValue(':nivel', $this->nivel);
+        $stmt->bindValue(':token_hash', $tokenHash, PDO::PARAM_STR);
+        $stmt->bindValue(':apelido', $this->apelido, PDO::PARAM_STR);
+        $stmt->bindValue(':dindin', $this->dindin, PDO::PARAM_INT);
+        $stmt->bindValue(':nivel', $this->nivel, PDO::PARAM_INT);
 
-        if ($stmt->execute()) {
+        $stmt->execute();
 
-            $this->idsu = (int) $pdo->lastInsertId();
+        $this->idsu = (int) $pdo->lastInsertId();
 
-            return $this->idsu > 0;
-        }
-
-        return false;
+        return $this->idsu > 0;
     }
 
     public function VerPerfil() {
@@ -103,9 +90,7 @@ class Usuario {
                 WHERE idsu = :idsu";
 
         $stmt = $pdo->prepare($sql);
-
-        $stmt->bindValue(':idsu', $this->idsu);
-
+        $stmt->bindValue(':idsu', $this->idsu, PDO::PARAM_INT);
         $stmt->execute();
 
         $dados = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -115,30 +100,28 @@ class Usuario {
         }
 
         $this->apelido = $dados['apelido'];
-        $this->dindin = $dados['dindin'];
-        $this->nivel = $dados['nivel'];
+        $this->dindin = (int) $dados['dindin'];
+        $this->nivel = (int) $dados['nivel'];
 
         return $dados;
     }
 
     public function EditarPerfil($apelido) {
 
-        $con = new conexao();
-        $pdo = $con->pdo;
-
         if (!$this->idsu) {
             return false;
         }
+
+        $con = new conexao();
+        $pdo = $con->pdo;
 
         $sql = "UPDATE usuario
                 SET apelido = :apelido
                 WHERE idsu = :idsu";
 
         $stmt = $pdo->prepare($sql);
-
-        $stmt->bindValue(':apelido', $apelido);
-        $stmt->bindValue(':idsu', $this->idsu);
-
+        $stmt->bindValue(':apelido', $apelido, PDO::PARAM_STR);
+        $stmt->bindValue(':idsu', $this->idsu, PDO::PARAM_INT);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
@@ -146,14 +129,10 @@ class Usuario {
             return true;
         }
 
-        $sql = "SELECT idsu
-                FROM usuario
-                WHERE idsu = :idsu";
+        $sql = "SELECT idsu FROM usuario WHERE idsu = :idsu";
 
         $stmt = $pdo->prepare($sql);
-
-        $stmt->bindValue(':idsu', $this->idsu);
-
+        $stmt->bindValue(':idsu', $this->idsu, PDO::PARAM_INT);
         $stmt->execute();
 
         if ($stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -195,6 +174,4 @@ class Usuario {
     public function setNivel($nivel) {
         $this->nivel = $nivel;
     }
-}
-
-?>
+}  ?>

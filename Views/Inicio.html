@@ -5,146 +5,202 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PreparandoFabrica</title>
     <style>
-
-body {
-    background-image: url("imagem/backInicio.png");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    min-height: 100vh;
-    margin: 0;
-}
-    ul {
-        list-style: none;
-   
-    }
-       .menu {
-    width:100%;
-    display:flex;
-    justify-content:center;
-    gap:30px;
-    padding:77px  0;
-    list-style-type: style none;
-    margin: 0;
-       }
-       .menu li{
-       background-color:rgb(143, 14, 14);
-       border:3px solid;
-       border-radius:12px;
-       transition:transform 0,2s,background color 0,2;
-       min-width: none; width: 400px;
-       text-align:center;
-       }
-       .menu a{
-        display:block;
-        padding:20px 20px;
-        color:black;
-        text-decoration: none;
-        font-family:sans-serif;
-        font-weight:bold;
-        font-size:30px;
-       }
-     
-     .menu li:hover{
-        background-color: aquamarine;
-        transform:translateY(-5px);
-        border-color:cadetblue;
-     }  /* css da janela flutuante */
-       dialog {
+        body {
+            background-image: url("imagem/backInicio.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        ul {
+            list-style: none;
+        }
+        .menu {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 77px 0;
+            margin: 0;
+        }
+        .menu li {
+            background-color: rgb(143, 14, 14);
+            border: 3px solid;
+            border-radius: 12px;
+            transition: transform 0.2s, background-color 0.2s;
+            width: 400px;
+            text-align: center;
+        }
+        .menu a {
+            display: block;
+            padding: 20px 20px;
+            color: black;
+            text-decoration: none;
+            font-family: sans-serif;
+            font-weight: bold;
+            font-size: 30px;
+        }
+        .menu li:hover {
+            background-color: aquamarine;
+            transform: translateY(-5px);
+            border-color: cadetblue;
+        }
+        dialog {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             padding: 25px;
             font-family: Arial, sans-serif;
             text-align: center;
         }
-       
         dialog::backdrop {
             background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(3px); /* Deixa o fundo levemente borrado */
+            backdrop-filter: blur(3px);
         }
         iframe {
             border: 1px solid #ddd;
             border-radius: 6px;
             margin-top: 15px;
         }
+        #status-sessao {
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: sans-serif;
+            font-size: 14px;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
-   <nav class="menu" role="alert" hidden>
+    <nav class="menu" id="menu-principal" hidden>
         <ul>
-           
-            <li><a>Perfil</a></li>
+            <li><a href="../Views/perfil.html">Perfil</a></li>
             <li><a href="../Views/deck.html">Deck</a></li>
             <li><a href="../Views/batalha.html">Batalha</a></li>
             <li><a href="../Views/loja.html">Loja</a></li>
             <li><a href="../Views/centrocura.html">Centro de Cura</a></li>
         </ul>
     </nav>
-<script>
 
-async function iniciarJogo() {
+    <p id="status-sessao" aria-live="polite">Iniciando sessão...</p>
 
-    const menu = document.getElementById("menuJogo");
-    const mensagemErro = document.getElementById("erroInicializacao");
+    <script>
+      
+const URL_SESSAO_INIT = '../Controllers/sessao_automatica.php';
 
-    try {
+let promessaSessao = null;
+let sessaoPronta = false;
 
-        const resposta = await fetch("../Controllers/criarSessao.php", {
-            method: "GET",
-            credentials: "same-origin",
-            cache: "no-store",
+function atualizarStatus(texto) {
+    const elemento = document.getElementById('status-sessao');
+
+    if (elemento) {
+        elemento.textContent = texto;
+    }
+}
+
+async function iniciarSessaoViaJson() {
+
+    if (sessaoPronta) {
+        return true;
+    }
+
+    if (promessaSessao) {
+        return promessaSessao;
+    }
+
+    promessaSessao = (async () => {
+
+        atualizarStatus('Preparando sessão do jogador...');
+
+        const resposta = await fetch(URL_SESSAO_INIT, {
+            method: 'GET',
             headers: {
-                "Accept": "application/json"
-            }
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin',
+            cache: 'no-store'
         });
-
-        const texto = await resposta.text();
 
         let dados;
 
         try {
-            dados = JSON.parse(texto);
+            dados = await resposta.json();
         } catch (erro) {
-            console.error("Resposta recebida do PHP:", texto);
-            throw new Error("O servidor não retornou um JSON válido.");
-        }
-console.log("Status HTTP:", resposta.status);
-console.log("Resposta completa:", JSON.stringify(dados, null, 2));
-        if (!resposta.ok || !dados.ok) {
-            throw new Error(
-                dados.detalhe || dados.erro || "Falha ao iniciar o jogador."
-            );
+            throw new Error('O controller não retornou um JSON válido.');
         }
 
-        if (!dados.usuario || !dados.usuario.idsu) {
-            throw new Error("O jogador não foi identificado.");
+        if (!resposta.ok || !dados.ok) {
+            throw new Error(dados.erro || 'Falha ao iniciar a sessão.');
         }
+
+        sessaoPronta = true;
+
+        sessionStorage.setItem('jogador_ativo', JSON.stringify({
+            idsu: dados.idsu,
+            apelido: dados.apelido
+        }));
+
+        const menu = document.getElementById('menu-principal');
 
         if (menu) {
             menu.hidden = false;
         }
 
-        if (mensagemErro) {
-            mensagemErro.hidden = true;
-        }
+        atualizarStatus(`Sessão ativa: ${dados.apelido} (ID ${dados.idsu})`);
 
+        return dados;
+
+    })();
+
+    try {
+        return await promessaSessao;
     } catch (erro) {
-
-        console.error("Erro ao iniciar o jogo:", erro);
-
-        if (mensagemErro) {
-            mensagemErro.textContent = erro.message;
-            mensagemErro.hidden = false;
-        }
-
-        if (menu) {
-            menu.hidden = true;
-        }
+        promessaSessao = null;
+        throw erro;
     }
 }
 
-iniciarJogo();
-</script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    iniciarSessaoViaJson().catch((erro) => {
+        console.error(erro);
+        atualizarStatus(erro.message);
+    });
+
+    document.querySelectorAll('#menu-principal a[href]').forEach((link) => {
+
+        link.addEventListener('click', async (evento) => {
+
+            const href = link.getAttribute('href');
+
+            if (!href || href === '#') {
+                return;
+            }
+
+            evento.preventDefault();
+
+            try {
+                atualizarStatus('Confirmando sessão...');
+
+                await iniciarSessaoViaJson();
+
+                window.location.href = href;
+
+            } catch (erro) {
+                console.error(erro);
+                atualizarStatus(erro.message);
+            }
+        });
+    });
+});
+    </script>
 </body>
 </html>
