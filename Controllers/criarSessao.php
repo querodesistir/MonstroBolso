@@ -1,14 +1,14 @@
 
 <?php
 
-session_start();
-
-require_once __DIR__ . "/../Models/conexao.php";
-require_once __DIR__ . "/../autoload.php";
-
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+
+    session_start();
+
+    require_once __DIR__ . "/../Models/conexao.php";
+    require_once __DIR__ . "/../autoload.php";
 
     $nomeCookie = 'monstrob_token';
 
@@ -93,9 +93,9 @@ try {
 
     echo json_encode([
         'ok' => false,
-        'erro' => 'Não foi possível iniciar o jogador.'
+        'erro' => 'Não foi possível iniciar o jogador.',
+        'detalhe' => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
-
 }
 
 ?>

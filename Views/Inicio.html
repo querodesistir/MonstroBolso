@@ -6,14 +6,14 @@
     <title>PreparandoFabrica</title>
     <style>
 
-     body{
-background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(imagens/backInicio.jpg);
+body {
+    background-image: url("imagem/backInicio.png");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
     min-height: 100vh;
     margin: 0;
-     }
+}
     ul {
         list-style: none;
    
@@ -71,7 +71,7 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
     </style>
 </head>
 <body>
-   <nav class="menu">
+   <nav class="menu" role="alert" hidden>
         <ul>
            
             <li><a>Perfil</a></li>
@@ -82,60 +82,66 @@ background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(i
         </ul>
     </nav>
 <script>
+
 async function iniciarJogo() {
 
-const menu = document.getElementById("menuJogo");
-const mensagemErro = document.getElementById("erroInicializacao");
+    const menu = document.getElementById("menuJogo");
+    const mensagemErro = document.getElementById("erroInicializacao");
 
-try {
+    try {
 
-    const resposta = await fetch("../Controllers/criarSessao.php", {
-        method: "GET",
-        credentials: "same-origin",
-        cache: "no-store",
-        headers: {
-            "Accept": "application/json"
+        const resposta = await fetch("../Controllers/criarSessao.php", {
+            method: "GET",
+            credentials: "same-origin",
+            cache: "no-store",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        const texto = await resposta.text();
+
+        let dados;
+
+        try {
+            dados = JSON.parse(texto);
+        } catch (erro) {
+            console.error("Resposta recebida do PHP:", texto);
+            throw new Error("O servidor não retornou um JSON válido.");
         }
-    });
+console.log("Status HTTP:", resposta.status);
+console.log("Resposta completa:", JSON.stringify(dados, null, 2));
+        if (!resposta.ok || !dados.ok) {
+            throw new Error(
+                dados.detalhe || dados.erro || "Falha ao iniciar o jogador."
+            );
+        }
 
-    if (!resposta.ok) {
-        throw new Error(
-            "Erro HTTP " + resposta.status +
-            ". Verifique o caminho do criarSessao.php."
-        );
+        if (!dados.usuario || !dados.usuario.idsu) {
+            throw new Error("O jogador não foi identificado.");
+        }
+
+        if (menu) {
+            menu.hidden = false;
+        }
+
+        if (mensagemErro) {
+            mensagemErro.hidden = true;
+        }
+
+    } catch (erro) {
+
+        console.error("Erro ao iniciar o jogo:", erro);
+
+        if (mensagemErro) {
+            mensagemErro.textContent = erro.message;
+            mensagemErro.hidden = false;
+        }
+
+        if (menu) {
+            menu.hidden = true;
+        }
     }
-
-    const tipoResposta = resposta.headers.get("content-type") || "";
-
-    if (!tipoResposta.includes("application/json")) {
-        throw new Error(
-            "O servidor não retornou JSON. Verifique o arquivo criarSessao.php."
-        );
-    }
-
-    const dados = await resposta.json();
-
-    if (!dados.ok || !dados.usuario || !dados.usuario.idsu) {
-        throw new Error(
-            dados.erro || "Não foi possível identificar o jogador."
-        );
-    }
-
-    console.log("Jogador identificado:", dados.usuario);
-
-    menu.hidden = false;
-    mensagemErro.hidden = true;
-
-} catch (erro) {
-
-    console.error("Erro ao iniciar o jogo:", erro);
-
-    mensagemErro.textContent =
-        "Não foi possível iniciar o jogo. " + erro.message;
-
-    mensagemErro.hidden = false;
-    menu.hidden = true;
-}
 }
 
 iniciarJogo();

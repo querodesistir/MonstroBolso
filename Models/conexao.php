@@ -6,7 +6,7 @@ class conexao {
     public function __construct() {
         try {
             $pdo = new PDO(
-                "mysql:host=localhost;dbname=Pou;charset=utf8mb4",
+                "mysql:host=localhost;dbname=monstrobolso;charset=utf8mb4",
                 "root",
                 ""
             );
