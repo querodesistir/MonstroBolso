@@ -1,9 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PreparandoFabrica</title>
+    <title>Início — MonstroBolso</title>
+
     <style>
         body {
             background-image: url("imagem/backInicio.png");
@@ -12,195 +15,194 @@
             background-position: center;
             min-height: 100vh;
             margin: 0;
+            font-family: Arial, sans-serif;
         }
+
         ul {
             list-style: none;
+            padding: 0;
+            margin: 0;
         }
+
         .menu {
             width: 100%;
             display: flex;
             justify-content: center;
-            gap: 30px;
             padding: 77px 0;
             margin: 0;
         }
+
+        .menu ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
         .menu li {
             background-color: rgb(143, 14, 14);
-            border: 3px solid;
+            border: 3px solid black;
             border-radius: 12px;
             transition: transform 0.2s, background-color 0.2s;
-            width: 400px;
+            width: 300px;
             text-align: center;
         }
+
         .menu a {
             display: block;
-            padding: 20px 20px;
+            padding: 20px;
             color: black;
             text-decoration: none;
-            font-family: sans-serif;
             font-weight: bold;
             font-size: 30px;
         }
+
         .menu li:hover {
             background-color: aquamarine;
             transform: translateY(-5px);
             border-color: cadetblue;
         }
-        dialog {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            padding: 25px;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        dialog::backdrop {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(3px);
-        }
-        iframe {
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
+
         #status-sessao {
             position: fixed;
             bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.75);
-            color: #fff;
+            color: white;
             padding: 8px 16px;
             border-radius: 8px;
-            font-family: sans-serif;
             font-size: 14px;
             margin: 0;
+            text-align: center;
+            max-width: 90%;
         }
     </style>
 </head>
+
 <body>
+
     <nav class="menu" id="menu-principal" hidden>
         <ul>
-            <li><a href="../Views/perfil.html">Perfil</a></li>
-            <li><a href="../Views/deck.html">Deck</a></li>
-            <li><a href="../Views/batalha.html">Batalha</a></li>
-            <li><a href="../Views/loja.html">Loja</a></li>
-            <li><a href="../Views/centrocura.html">Centro de Cura</a></li>
+            <li><a href="../Views/perfil.php">Perfil</a></li>
+            <li><a href="../Views/deck.php">Deck</a></li>
+            <li><a href="../Views/batalha.php">Batalha</a></li>
+            <li><a href="../Views/loja.php">Loja</a></li>
+            <li><a href="../Views/centrocura.php">Centro de Cura</a></li>
         </ul>
     </nav>
 
-    <p id="status-sessao" aria-live="polite">Iniciando sessão...</p>
+    <p id="status-sessao" aria-live="polite">
+        Preparando sessão do jogador...
+    </p>
 
     <script>
-      
-const URL_SESSAO_INIT = '../Controllers/sessao_automatica.php';
+        const URL_SESSAO_INIT = '../Controllers/sessao_automatica.php';
 
-let promessaSessao = null;
-let sessaoPronta = false;
-
-function atualizarStatus(texto) {
-    const elemento = document.getElementById('status-sessao');
-
-    if (elemento) {
-        elemento.textContent = texto;
-    }
-}
-
-async function iniciarSessaoViaJson() {
-
-    if (sessaoPronta) {
-        return true;
-    }
-
-    if (promessaSessao) {
-        return promessaSessao;
-    }
-
-    promessaSessao = (async () => {
-
-        atualizarStatus('Preparando sessão do jogador...');
-
-        const resposta = await fetch(URL_SESSAO_INIT, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            },
-            credentials: 'same-origin',
-            cache: 'no-store'
-        });
-
-        let dados;
-
-        try {
-            dados = await resposta.json();
-        } catch (erro) {
-            throw new Error('O controller não retornou um JSON válido.');
-        }
-
-        if (!resposta.ok || !dados.ok) {
-            throw new Error(dados.erro || 'Falha ao iniciar a sessão.');
-        }
-
-        sessaoPronta = true;
-
-        sessionStorage.setItem('jogador_ativo', JSON.stringify({
-            idsu: dados.idsu,
-            apelido: dados.apelido
-        }));
+        let promessaSessao = null;
+        let sessaoPronta = false;
 
         const menu = document.getElementById('menu-principal');
+        const status = document.getElementById('status-sessao');
 
-        if (menu) {
-            menu.hidden = false;
+        function atualizarStatus(texto) {
+            status.textContent = texto;
         }
 
-        atualizarStatus(`Sessão ativa: ${dados.apelido} (ID ${dados.idsu})`);
+        async function iniciarSessaoViaJson() {
 
-        return dados;
-
-    })();
-
-    try {
-        return await promessaSessao;
-    } catch (erro) {
-        promessaSessao = null;
-        throw erro;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    iniciarSessaoViaJson().catch((erro) => {
-        console.error(erro);
-        atualizarStatus(erro.message);
-    });
-
-    document.querySelectorAll('#menu-principal a[href]').forEach((link) => {
-
-        link.addEventListener('click', async (evento) => {
-
-            const href = link.getAttribute('href');
-
-            if (!href || href === '#') {
-                return;
+            // Evita iniciar a mesma sessão várias vezes
+            if (sessaoPronta) {
+                return true;
             }
 
-            evento.preventDefault();
+            // Reaproveita uma requisição que ainda está acontecendo
+            if (promessaSessao) {
+                return promessaSessao;
+            }
+
+            promessaSessao = (async () => {
+
+                atualizarStatus('Preparando sessão do jogador...');
+
+                const resposta = await fetch(URL_SESSAO_INIT, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    cache: 'no-store'
+                });
+
+                let dados;
+
+                try {
+                    dados = await resposta.json();
+                } catch (erro) {
+                    throw new Error(
+                        'O controller não retornou um JSON válido.'
+                    );
+                }
+
+                if (!resposta.ok || !dados.ok) {
+                    throw new Error(
+                        dados.detalhe ||
+                        dados.erro ||
+                        'Não foi possível iniciar a sessão.'
+                    );
+                }
+
+                if (!dados.idsu || !dados.apelido) {
+                    throw new Error(
+                        'O controller não retornou os dados do jogador.'
+                    );
+                }
+
+                // A sessão PHP já foi criada pelo controller
+                sessaoPronta = true;
+
+                // Libera o menu somente após confirmar a sessão
+                menu.hidden = false;
+
+                atualizarStatus(
+                    `Sessão ativa: ${dados.apelido}`
+                );
+
+                return dados;
+
+            })();
 
             try {
-                atualizarStatus('Confirmando sessão...');
+                return await promessaSessao;
+
+            } catch (erro) {
+
+                promessaSessao = null;
+                sessaoPronta = false;
+
+                throw erro;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            try {
 
                 await iniciarSessaoViaJson();
 
-                window.location.href = href;
-
             } catch (erro) {
-                console.error(erro);
-                atualizarStatus(erro.message);
+
+                console.error('Erro ao iniciar sessão:', erro);
+
+                atualizarStatus(
+                    'Erro na sessão: ' + erro.message
+                );
+
+                menu.hidden = true;
             }
+
         });
-    });
-});
     </script>
+
 </body>
 </html>

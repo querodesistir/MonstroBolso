@@ -1,152 +1,320 @@
+
 <?php
 /* ============================================================
    BATALHA POR TURNOS (PHP)
-   cada comando é um POST: o servidor calcula dano, aplica os
-   status, roda a vez do inimigo e remonta a página inteira.
-   os efeitos (projetil, tremida, numeros) entram como classes
-   CSS que animam quando a página abre.
+   Cada comando é um POST. O servidor processa a ação e
+   redireciona para evitar reenvio ao atualizar a página.
    ============================================================ */
 
 require_once __DIR__ . '/funcoes.php';
+
 sessao();
 
-/* sem parceiro escolhido, volta pra escolha */
+/* Verifica se existe um jogador escolhido */
 if (empty($_SESSION['jogador'])) {
-  header('Location: index.php');
-  exit;
+    header('Location: index.php');
+    exit;
 }
 
-/* POST: processa o turno e redireciona (padrão PRG, evita reenvio no F5) */
+/* Inicializa os dados básicos da sessão */
+if (!isset($_SESSION['log']) || !is_array($_SESSION['log'])) {
+    $_SESSION['log'] = [];
+}
+
+if (!isset($_SESSION['estoque']) || !is_array($_SESSION['estoque'])) {
+    $_SESSION['estoque'] = [];
+}
+
+/* POST: processa a ação e redireciona */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
-  processarAcao($_POST['acao']);
-  header('Location: batalha.php');
-  exit;
+    processarAcao($_POST['acao']);
+
+    header('Location: batalha.php');
+    exit;
 }
 
-/* GET direto sem batalha ativa: sorteia um adversário */
-/*if (empty($_SESSION['inimigo']) && empty($_SESSION['resultado'])) {
-  proximoDesafio();
+/* Cria um adversário se não houver batalha ativa nem resultado */
+if (empty($_SESSION['inimigo']) && empty($_SESSION['resultado'])) {
+    proximoDesafio();
 }
 
+/* Recupera os dados da batalha */
 $jogador = $_SESSION['jogador'];
-$inimigo = $_SESSION['inimigo'];
-$resultado = $_SESSION['resultado'];
-$msg = $_SESSION['msg'];
+$inimigo = $_SESSION['inimigo'] ?? null;
+$resultado = $_SESSION['resultado'] ?? null;
+$msg = $_SESSION['msg'] ?? null;
+
 $_SESSION['msg'] = null;
+
 $fx = consomeFx();
 $log = array_slice($_SESSION['log'], -6);
-?>*/
+
+$estoque = $_SESSION['estoque'];
+
+/* Se não houver adversário nem resultado, retorna à escolha */
+if (empty($inimigo) && empty($resultado)) {
+    header('Location: index.php');
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Batalha — Monstros</title>
-<link rel="stylesheet" href="estilo-batalha.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalha — Monstros</title>
+    <link rel="stylesheet" href="estilo-batalha.css">
 </head>
+
 <body>
 
 <div id="tela-batalha">
-  <div id="arena"<?php
-    if (isset($BIOMAS_IMG[$inimigo['tipo']])) {
-      echo ' style="background-image: linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.3)), url(\'' . $BIOMAS_IMG[$inimigo['tipo']] . '\'); background-size: cover; background-position: center;"';
-    }
-    if (!empty($fx['arena'])) echo ' class="arena-treme"';
-  ?>>
-    <div id="bioma-tag">Bioma: <?php echo e($NOME_BIOMA[$inimigo['tipo']]); ?></div>
-    <div class="caixa-status" id="status-inimigo"><?php echo caixaStatus($inimigo, false); ?></div>
-    <div class="monstro<?php echo (empty($fx['novo']) ? '' : ' entrar-dir') . (empty($fx['hit']['i']) ? '' : ' sofrendo'); ?>" id="sprite-inimigo">
-      <?php
-      echo spriteHtml($inimigo);
-      echo numsHtml($fx, 'i');
-      ?>
-    </div>
-    <div class="monstro<?php echo (empty($fx['novo']) ? '' : ' entrar-esq') . (empty($fx['hit']['j']) ? '' : ' sofrendo'); ?>" id="sprite-jogador">
-      <?php
-      echo spriteHtml($jogador);
-      echo numsHtml($fx, 'j');
-      ?>
-    </div>
-    <div class="caixa-status" id="status-jogador"><?php echo caixaStatus($jogador, true); ?></div>
-    <?php if (!empty($fx['proj'])): ?>
-      <div class="projetil proj-<?php echo e($fx['proj']['tipo']); ?> voar-<?php echo e($fx['proj']['dir']); ?>"></div>
-    <?php endif; ?>
-  </div>
 
-  <div id="painel">
-    <div id="barra-log">
-      <div id="log">
-        <?php
-        $total = count($log);
-        foreach ($log as $i => $linha) {
-          echo '<p' . ($i === $total - 1 ? ' class="ultima"' : '') . '>' . e($linha) . '</p>';
-        }
-        ?>
-      </div>
-      <form method="post"><button id="btn-fugir" name="acao" value="fugir">Fugir da batalha</button></form>
-    </div>
+    <?php if (!$resultado && $inimigo): ?>
 
-    <?php if ($msg): ?>
-      <div id="aviso-jogo" class="<?php echo e($msg['tipo']); ?>"><?php echo e($msg['texto']); ?></div>
-    <?php endif; ?>
-
-    <?php if ($resultado): ?>
-
-      <div id="resultado">
-        <div id="cartao-resultado">
-          <h2 id="titulo-resultado"><?php echo e($resultado['titulo']); ?></h2>
-          <p id="texto-resultado"><?php echo e($resultado['texto']); ?></p>
-          <p id="placar-resultado"><?php echo e($resultado['placar']); ?></p>
-          <div class="botoes-resultado">
-            <?php if ($resultado['tipo'] === 'vitoria'): ?>
-              <form method="post"><button id="btn-de-novo" name="acao" value="novo">Próximo desafio</button></form>
-            <?php elseif ($_SESSION['estoque']['reviver'] > 0): ?>
-              <form method="post">
-                <button id="btn-reviver" name="acao" value="reviver">Usar Reviver (x<?php echo $_SESSION['estoque']['reviver']; ?>)</button>
-              </form>
+        <div id="arena"
+            <?php if (isset($BIOMAS_IMG[$inimigo['tipo']])): ?>
+                style="background-image: linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.3)), url('<?php echo e($BIOMAS_IMG[$inimigo['tipo']]); ?>'); background-size: cover; background-position: center;"
             <?php endif; ?>
-            <a id="btn-trocar" href="index.php">Trocar de monstro</a>
-            <a id="btn-loja-resultado" href="loja.php">Ir à loja</a>
-          </div>
+
+            <?php if (!empty($fx['arena'])): ?>
+                class="arena-treme"
+            <?php endif; ?>
+        >
+
+            <div id="bioma-tag">
+                Bioma:
+                <?php echo e($NOME_BIOMA[$inimigo['tipo']] ?? 'Desconhecido'); ?>
+            </div>
+
+            <div class="caixa-status" id="status-inimigo">
+                <?php echo caixaStatus($inimigo, false); ?>
+            </div>
+
+            <div class="monstro<?php
+                echo (empty($fx['novo']) ? '' : ' entrar-dir') .
+                     (empty($fx['hit']['i']) ? '' : ' sofrendo');
+            ?>" id="sprite-inimigo">
+
+                <?php
+                echo spriteHtml($inimigo);
+                echo numsHtml($fx, 'i');
+                ?>
+
+            </div>
+
+            <div class="monstro<?php
+                echo (empty($fx['novo']) ? '' : ' entrar-esq') .
+                     (empty($fx['hit']['j']) ? '' : ' sofrendo');
+            ?>" id="sprite-jogador">
+
+                <?php
+                echo spriteHtml($jogador);
+                echo numsHtml($fx, 'j');
+                ?>
+
+            </div>
+
+            <div class="caixa-status" id="status-jogador">
+                <?php echo caixaStatus($jogador, true); ?>
+            </div>
+
+            <?php if (!empty($fx['proj'])): ?>
+                <div class="projetil proj-<?php echo e($fx['proj']['tipo']); ?> voar-<?php echo e($fx['proj']['dir']); ?>"></div>
+            <?php endif; ?>
+
         </div>
-      </div>
-
-    <?php else: ?>
-
-      <div id="comandos">
-        <form method="post"><button class="btn-cmd" name="acao" value="golpe0"><?php
-          echo e($jogador['golpes'][0]['n']);
-          ?> <span class="badge" style="background:<?php echo $COR_TIPO[$jogador['golpes'][0]['t']]; ?>"><?php echo $NOME_TIPO[$jogador['golpes'][0]['t']]; ?></span></button></form>
-        <form method="post"><button class="btn-cmd" name="acao" value="golpe1"><?php
-          echo e($jogador['golpes'][1]['n']);
-          ?> <span class="badge" style="background:<?php echo $COR_TIPO[$jogador['golpes'][1]['t']]; ?>"><?php echo $NOME_TIPO[$jogador['golpes'][1]['t']]; ?></span></button></form>
-        <form method="post"><button class="btn-cmd" name="acao" value="defender">Defender</button></form>
-        <form method="post"><button class="btn-cmd" name="acao" value="item"<?php echo $jogador['pocao'] <= 0 ? ' disabled' : ''; ?>>Poção (<?php echo $jogador['pocao']; ?>)</button></form>
-        <form method="post"><button class="btn-cmd" name="acao" value="item"<?php echo ($_SESSION['estoque']['forca'] <= 0 || $jogador['forca'] >= 3) ? ' disabled' : ''; ?>>Força (<?php echo $_SESSION['estoque']['forca']; ?>)</button></form>
-        <form method="post"><button class="btn-cmd" name="acao" value="item"<?php echo ($_SESSION['estoque']['escudo'] <= 0 || $jogador['escudo'] >= 3) ? ' disabled' : ''; ?>>Escudo (<?php echo $_SESSION['estoque']['escudo']; ?>)</button></form>
-        <div class="btn-cmd btn-mochila">Mochila de itens (abaixo)</div>
-      </div>
-
-      <div id="mochila-batalha">
-        <h3>Mochila — itens da loja</h3>
-        <?php
-        $temAlgo = false;
-        foreach ($ITENS as $item) {
-          $qtd = $_SESSION['estoque'][$item['chave']];
-          $usosMax = (($item['chave'] === 'forca' && $jogador['forca'] >= 3) || ($item['chave'] === 'escudo' && $jogador['escudo'] >= 3));
-          if ($qtd <= 0) continue;
-          $temAlgo = true;
-          echo '<div class="bag-linha"><span class="bn">' . e($item['nome']) . '</span>'
-            . '<span class="be">' . e($item['desc']) . ' · x' . $qtd . '</span>'
-            . botaoItem($item, $qtd, $usosMax || ($item['chave'] === 'reviver' && $jogador['hp'] > 0))
-            . '</div>';
-        }
-        if (!$temAlgo) echo '<p class="mochila-vazia">Mochila vazia — visite a loja pra comprar itens!</p>';
-        ?>
-      </div>
 
     <?php endif; ?>
-  </div>
+
+    <div id="painel">
+
+        <div id="barra-log">
+
+            <div id="log">
+                <?php
+                $total = count($log);
+
+                foreach ($log as $i => $linha) {
+                    echo '<p' .
+                        ($i === $total - 1 ? ' class="ultima"' : '') .
+                        '>' . e($linha) . '</p>';
+                }
+                ?>
+            </div>
+
+            <?php if (!$resultado): ?>
+                <form method="post">
+                    <button id="btn-fugir" name="acao" value="fugir">
+                        Fugir da batalha
+                    </button>
+                </form>
+            <?php endif; ?>
+
+        </div>
+
+        <?php if (!empty($msg)): ?>
+            <div id="aviso-jogo" class="<?php echo e($msg['tipo'] ?? ''); ?>">
+                <?php echo e($msg['texto'] ?? ''); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($resultado): ?>
+
+            <div id="resultado">
+
+                <div id="cartao-resultado">
+
+                    <h2 id="titulo-resultado">
+                        <?php echo e($resultado['titulo'] ?? 'Fim da batalha'); ?>
+                    </h2>
+
+                    <p id="texto-resultado">
+                        <?php echo e($resultado['texto'] ?? ''); ?>
+                    </p>
+
+                    <p id="placar-resultado">
+                        <?php echo e($resultado['placar'] ?? ''); ?>
+                    </p>
+
+                    <div class="botoes-resultado">
+
+                        <?php if (($resultado['tipo'] ?? '') === 'vitoria'): ?>
+
+                            <form method="post">
+                                <button id="btn-de-novo" name="acao" value="novo">
+                                    Próximo desafio
+                                </button>
+                            </form>
+
+                        <?php elseif (($estoque['reviver'] ?? 0) > 0): ?>
+
+                            <form method="post">
+                                <button id="btn-reviver" name="acao" value="reviver">
+                                    Usar Reviver (x<?php echo (int)$estoque['reviver']; ?>)
+                                </button>
+                            </form>
+
+                        <?php endif; ?>
+
+                        <a id="btn-trocar" href="index.php">
+                            Trocar de monstro
+                        </a>
+
+                        <a id="btn-loja-resultado" href="loja.php">
+                            Ir à loja
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+
+        <?php else: ?>
+
+            <div id="comandos">
+
+                <form method="post">
+                    <button class="btn-cmd" name="acao" value="golpe0">
+                        <?php echo e($jogador['golpes'][0]['n']); ?>
+
+                        <span class="badge" style="background:<?php echo e($COR_TIPO[$jogador['golpes'][0]['t']] ?? '#777'); ?>">
+                            <?php echo e($NOME_TIPO[$jogador['golpes'][0]['t']] ?? ''); ?>
+                        </span>
+                    </button>
+                </form>
+
+                <form method="post">
+                    <button class="btn-cmd" name="acao" value="golpe1">
+                        <?php echo e($jogador['golpes'][1]['n']); ?>
+
+                        <span class="badge" style="background:<?php echo e($COR_TIPO[$jogador['golpes'][1]['t']] ?? '#777'); ?>">
+                            <?php echo e($NOME_TIPO[$jogador['golpes'][1]['t']] ?? ''); ?>
+                        </span>
+                    </button>
+                </form>
+
+                <form method="post">
+                    <button class="btn-cmd" name="acao" value="defender">
+                        Defender
+                    </button>
+                </form>
+
+                <form method="post">
+                    <button class="btn-cmd" name="acao" value="item"
+                        <?php echo ($jogador['pocao'] ?? 0) <= 0 ? 'disabled' : ''; ?>>
+                        Poção (<?php echo (int)($jogador['pocao'] ?? 0); ?>)
+                    </button>
+                </form>
+
+                <form method="post">
+                    <button class="btn-cmd" name="acao" value="item"
+                        <?php echo (($estoque['forca'] ?? 0) <= 0 || ($jogador['forca'] ?? 0) >= 3) ? 'disabled' : ''; ?>>
+                        Força (<?php echo (int)($estoque['forca'] ?? 0); ?>)
+                    </button>
+                </form>
+
+                <form method="post">
+                    <button class="btn-cmd" name="acao" value="item"
+                        <?php echo (($estoque['escudo'] ?? 0) <= 0 || ($jogador['escudo'] ?? 0) >= 3) ? 'disabled' : ''; ?>>
+                        Escudo (<?php echo (int)($estoque['escudo'] ?? 0); ?>)
+                    </button>
+                </form>
+
+                <div class="btn-cmd btn-mochila">
+                    Mochila de itens (abaixo)
+                </div>
+
+            </div>
+
+            <div id="mochila-batalha">
+
+                <h3>Mochila — itens da loja</h3>
+
+                <?php
+                $temAlgo = false;
+
+                foreach ($ITENS as $item) {
+
+                    $chave = $item['chave'];
+                    $qtd = (int)($estoque[$chave] ?? 0);
+
+                    $usosMax = (
+                        ($chave === 'forca' && ($jogador['forca'] ?? 0) >= 3) ||
+                        ($chave === 'escudo' && ($jogador['escudo'] ?? 0) >= 3)
+                    );
+
+                    if ($qtd <= 0) {
+                        continue;
+                    }
+
+                    $temAlgo = true;
+
+                    echo '<div class="bag-linha">';
+                    echo '<span class="bn">' . e($item['nome']) . '</span>';
+                    echo '<span class="be">' . e($item['desc']) . ' · x' . $qtd . '</span>';
+
+                    echo botaoItem(
+                        $item,
+                        $qtd,
+                        $usosMax || ($chave === 'reviver' && ($jogador['hp'] ?? 0) > 0)
+                    );
+
+                    echo '</div>';
+                }
+
+                if (!$temAlgo) {
+                    echo '<p class="mochila-vazia">Mochila vazia — visite a loja pra comprar itens!</p>';
+                }
+                ?>
+
+            </div>
+
+        <?php endif; ?>
+
+    </div>
 </div>
 
 </body>
